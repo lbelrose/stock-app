@@ -18,5 +18,5 @@ import { FooterComponent } from './shared/components/footer/footer.component';
   `,
 })
 export class AppComponent {
-  title = 'Paris Stock Tracker';
+  title = 'Nasdaq Stock Tracker';
 }

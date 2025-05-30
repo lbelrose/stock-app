@@ -11,8 +11,8 @@ import { catchError, forkJoin, map, of } from 'rxjs';
   imports: [CommonModule, StockCardComponent],
   template: `
     <div class="mb-8">
-      <h1 class="text-3xl font-bold">Paris Stock Exchange</h1>
-      <p class="text-neutral-600">Track the latest stock movements from the Euronext Paris exchange.</p>
+      <h1 class="text-3xl font-bold">Nasdaq Stock Exchange</h1>
+      <p class="text-neutral-600">Track the latest stock movements from the Euronext Nasdaq exchange.</p>
     </div>
     
     @if (loading) {

@@ -6,7 +6,7 @@ import { StockDetail } from '../models/stock.model';
   providedIn: 'root'
 })
 export class WatchlistService {
-  private watchlistKey = 'paris_stock_watchlist';
+  private watchlistKey = 'nasdaq_stock_watchlist';
   private watchlistSubject = new BehaviorSubject<StockDetail[]>([]);
   
   constructor() {

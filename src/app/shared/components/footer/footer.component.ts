@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="mb-4 md:mb-0">
             <p class="text-sm">
-              © 2025 Paris Stock Tracker. All data provided by TradingView.
+              © 2025 Nasdaq Stock Tracker. All data provided by TradingView.
             </p>
           </div>
           <div class="flex space-x-6">

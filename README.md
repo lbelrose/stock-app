@@ -1,10 +1,10 @@
-# Paris Stock Tracker
+# Nasdaq Stock Tracker
 
-A real-time stock tracking application for the Paris Stock Exchange using Angular 19, Python, and TradingView API.
+A real-time stock tracking application for the Nasdaq Stock Exchange using Angular 19, Python, and TradingView API.
 
 ## Features
 
-- Real-time stock quotes from Euronext Paris
+- Real-time stock quotes from Nasdaq
 - Interactive stock charts with multiple timeframes
 - Stock search functionality
 - Watchlist management

@@ -12,7 +12,7 @@ import { StockDetail } from '../../shared/models/stock.model';
   template: `
     <div class="mb-8">
       <h1 class="text-3xl font-bold">Your Watchlist</h1>
-      <p class="text-neutral-600">Track your favorite stocks from the Paris Stock Exchange.</p>
+      <p class="text-neutral-600">Track your favorite stocks from the Nasdaq Stock Exchange.</p>
     </div>
     
     @if (watchlist.length > 0) {

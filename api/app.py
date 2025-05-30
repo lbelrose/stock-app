@@ -36,37 +36,8 @@ def get_stock_data(symbol):
 
 @app.route('/api/search', methods=['GET'])
 def search_stocks():
-    # This is a simplified example with a predefined list of Paris stocks
+    # This is a simplified example with a predefined list of NASDAQ stocks
     # In a real application, you would have a database or use an API to get this data
-    paris_stocks = [
-        {"symbol": "AC.PA", "name": "Accor SA"},
-        {"symbol": "AI.PA", "name": "Air Liquide SA"},
-        {"symbol": "AIR.PA", "name": "Airbus SE"},
-        {"symbol": "ALO.PA", "name": "Alstom SA"},
-        {"symbol": "BN.PA", "name": "Danone SA"},
-        {"symbol": "BNP.PA", "name": "BNP Paribas SA"},
-        {"symbol": "CA.PA", "name": "Carrefour SA"},
-        {"symbol": "CAP.PA", "name": "Capgemini SE"},
-        {"symbol": "CS.PA", "name": "AXA SA"},
-        {"symbol": "DG.PA", "name": "Vinci SA"},
-        {"symbol": "ENGI.PA", "name": "Engie SA"},
-        {"symbol": "GLE.PA", "name": "Société Générale SA"},
-        {"symbol": "KER.PA", "name": "Kering SA"},
-        {"symbol": "LR.PA", "name": "Legrand SA"},
-        {"symbol": "MC.PA", "name": "LVMH Moët Hennessy Louis Vuitton SE"},
-        {"symbol": "ML.PA", "name": "Michelin SCA"},
-        {"symbol": "OR.PA", "name": "L'Oréal SA"},
-        {"symbol": "ORA.PA", "name": "Orange SA"},
-        {"symbol": "RI.PA", "name": "Pernod Ricard SA"},
-        {"symbol": "RMS.PA", "name": "Hermès International SCA"},
-        {"symbol": "SAF.PA", "name": "Safran SA"},
-        {"symbol": "SAN.PA", "name": "Sanofi SA"},
-        {"symbol": "SGO.PA", "name": "Compagnie de Saint-Gobain SA"},
-        {"symbol": "SU.PA", "name": "Schneider Electric SE"},
-        {"symbol": "VIE.PA", "name": "Veolia Environnement SA"},
-        {"symbol": "VIV.PA", "name": "Vivendi SE"},
-    ]
-
     nasdaq_stocks = [
         {"symbol": "AAPL", "name": "Apple Inc."},
         {"symbol": "MSFT", "name": "Microsoft Corporation"},
@@ -77,7 +48,12 @@ def search_stocks():
         {"symbol": "NVDA", "name": "NVIDIA Corporation"},
         {"symbol": "AMD", "name": "Advanced Micro Devices"},
         {"symbol": "INTC", "name": "Intel Corporation"},
-        {"symbol": "ORCL", "name": "Oracle Corporation"}
+        {"symbol": "ORCL", "name": "Oracle Corporation"},
+        {"symbol": "CSCO", "name": "Cisco Systems Inc."},
+        {"symbol": "ADBE", "name": "Adobe Inc."},
+        {"symbol": "NFLX", "name": "Netflix Inc."},
+        {"symbol": "PYPL", "name": "PayPal Holdings Inc."},
+        {"symbol": "INTC", "name": "Intel Corporation"}
     ]
 
     query = request.args.get('q', '').lower()

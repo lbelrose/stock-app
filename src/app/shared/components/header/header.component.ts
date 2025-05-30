@@ -12,7 +12,7 @@ import { StockSearchComponent } from '../stock-search/stock-search.component';
         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="flex items-center">
             <a routerLink="/" class="text-2xl font-bold text-primary-600">
-              Paris Stock Tracker
+              Nasdaq Stock Tracker
             </a>
           </div>
           
