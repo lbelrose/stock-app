@@ -10,7 +10,7 @@ CORS(app)
 def get_stock_data(symbol):
     try:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1d")
+        hist = ticker.history()
         
         if hist.empty:
             return jsonify({'error': f'No data found for {symbol}'}), 404
