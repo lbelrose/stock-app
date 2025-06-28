@@ -43,4 +43,13 @@ export class StockService {
   getDefaultStocks(): Observable<Stock[]> {
     return this.searchStocks('');
   }
+
+  getStockHistory(symbol: string, period: string = '1d', interval: string = '15m'): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/stock/${symbol}/history?period=${period}&interval=${interval}`).pipe(
+      catchError(error => {
+        console.error(`Error fetching historical data for ${symbol}:`, error);
+        throw new Error(`Unable to fetch historical data for ${symbol}`);
+      })
+    );
+  }
 }

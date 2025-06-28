@@ -10,7 +10,10 @@ CORS(app)
 def get_stock_data(symbol):
     try:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1d")
+        logging.info(f"Fetching data for {symbol}: {ticker}")
+        
+        # Fetch historical data
+        hist = ticker.history()
         
         if hist.empty:
             return jsonify({'error': f'No data found for {symbol}'}), 404
@@ -28,18 +31,48 @@ def get_stock_data(symbol):
         return jsonify({
             'symbol': symbol,
             'name': info.get('longName', symbol),
-            'close': last_quote['Close'],
-            'open': last_quote['Open'],
-            'high': last_quote['High'],
-            'low': last_quote['Low'],
-            'volume': last_quote['Volume'],
-            'change': change,
+            'close': float(last_quote['Close']),
+            'open': float(last_quote['Open']),
+            'high': float(last_quote['High']),
+            'low': float(last_quote['Low']),
+            'volume': int(last_quote['Volume']),
+            'change': float(change),
             'recommendation': get_recommendation(info),
             'rsi': calculate_rsi(hist['Close']),
             'macd': calculate_macd(hist['Close'])
         })
     except Exception as e:
         logging.error(f"Error fetching data for {symbol}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/stock/<symbol>/history', methods=['GET'])
+def get_stock_history(symbol):
+    period = request.args.get('period', '1d')
+    interval = request.args.get('interval', '15m')
+    
+    try:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period=period, interval=interval)
+        
+        if hist.empty:
+            return jsonify({'error': f'No historical data found for {symbol} with period={period} and interval={interval}'}), 404
+            
+        # Format historical data for JSON response
+        hist_data = []
+        for index, row in hist.iterrows():
+            hist_data.append({
+                'datetime': index.strftime('%Y-%m-%d %H:%M:%S'),
+                'open': float(row['Open']),
+                'high': float(row['High']),
+                'low': float(row['Low']),
+                'close': float(row['Close']),
+                'volume': int(row['Volume'])
+            })
+            
+        return jsonify(hist_data)
+        
+    except Exception as e:
+        logging.error(f"Error fetching historical data for {symbol}: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/search', methods=['GET'])

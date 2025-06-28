@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, ViewChild, ElementRef } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { StockDetail } from '../../../shared/models/stock.model';
+import { StockService } from '../../../shared/services/stock.service';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -15,12 +16,22 @@ Chart.register(...registerables);
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-xl font-semibold">Price Chart</h3>
         <div class="flex gap-2">
-          <button *ngFor="let period of periods" 
-                  (click)="setPeriod(period.value)"
-                  [ngClass]="selectedPeriod === period.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
-                  class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
-            {{ period.label }}
-          </button>
+          <div class="flex gap-2">
+            <button *ngFor="let period of periods" 
+                    (click)="setPeriod(period.value)"
+                    [ngClass]="selectedPeriod === period.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
+                    class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
+              {{ period.label }}
+            </button>
+          </div>
+          <div class="flex gap-2">
+            <button *ngFor="let interval of intervals" 
+                    (click)="setInterval(interval.value)"
+                    [ngClass]="selectedInterval === interval.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
+                    class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
+              {{ interval.label }}
+            </button>
+          </div>
         </div>
       </div>
       
@@ -35,26 +46,58 @@ export class StockChartComponent implements OnChanges {
   @ViewChild('chartCanvas', { static: true }) chartCanvas!: ElementRef;
   
   private chart: Chart | null = null;
+  private historicalData: any[] = [];
   
-  // In a real application, we would fetch historical data for different time periods
-  // For demo purposes, we'll generate random data
   periods = [
-    { label: '1D', value: 'day' },
-    { label: '1W', value: 'week' },
-    { label: '1M', value: 'month' },
-    { label: '3M', value: 'quarter' },
-    { label: '1Y', value: 'year' }
+    { label: '1D', value: '1d' },
+    { label: '7D', value: '7d' },
+    { label: '1M', value: '1mo' },
+    { label: '1Y', value: '1y' }
+  ];
+
+  intervals = [
+    { label: '1m', value: '1m' },
+    { label: '5m', value: '5m' },
+    { label: '15m', value: '15m' },
+    { label: '30m', value: '30m' },
+    { label: '1h', value: '1h' }
   ];
   
-  selectedPeriod = 'day';
+  selectedPeriod = '1d'; 
+  selectedInterval = '15m'; 
+  
+  constructor(private stockService: StockService) {}
   
   ngOnChanges(): void {
-    this.createChart();
+    if (this.stock) {
+      this.fetchAndCreateChart();
+    }
   }
   
   setPeriod(period: string): void {
     this.selectedPeriod = period;
-    this.updateChartData();
+    this.fetchAndCreateChart();
+  }
+
+  setInterval(interval: string): void {
+    this.selectedInterval = interval;
+    this.fetchAndCreateChart();
+  }
+  
+  private fetchAndCreateChart(): void {
+    if (!this.stock) return;
+
+    this.stockService.getStockHistory(this.stock.symbol, this.selectedPeriod, this.selectedInterval).subscribe({
+      next: (data) => {
+        this.historicalData = data;
+        this.createChart();
+      },
+      error: (err) => {
+        console.error(`Error fetching historical data for ${this.stock.symbol} with period ${this.selectedPeriod} and interval ${this.selectedInterval}:`, err);
+        this.historicalData = []; // Clear data on error
+        this.createChart(); // Re-create chart with empty data
+      }
+    });
   }
   
   private createChart(): void {
@@ -68,14 +111,33 @@ export class StockChartComponent implements OnChanges {
     // Get the context for the chart
     const ctx = this.chartCanvas.nativeElement.getContext('2d');
     
+    // Determine labels and data based on historicalData and selectedInterval
+    let labels: string[] = [];
+    let data: number[] = [];
+
+    if (this.historicalData.length > 0) {
+      labels = this.historicalData.map(item => {
+        const date = new Date(item.datetime);
+        if (this.selectedPeriod === '1d') {
+          return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        } else if (this.selectedPeriod === '7d' || this.selectedPeriod === '1mo') {
+          return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+        } else if (this.selectedPeriod === '1y') {
+          return date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+        }
+        return date.toLocaleDateString('fr-FR'); // Default fallback
+      });
+      data = this.historicalData.map(item => item.close);
+    }
+    
     // Create the chart
     this.chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: this.generateTimeLabels(),
+        labels: labels,
         datasets: [{
           label: this.stock.symbol,
-          data: this.generatePriceData(),
+          data: data,
           borderColor: this.stock.change >= 0 ? '#36B37E' : '#FF5630',
           backgroundColor: this.stock.change >= 0 ? 'rgba(54, 179, 126, 0.1)' : 'rgba(255, 86, 48, 0.1)',
           borderWidth: 2,
@@ -139,106 +201,5 @@ export class StockChartComponent implements OnChanges {
         }
       }
     });
-  }
-  
-  private updateChartData(): void {
-    if (!this.chart) return;
-    
-    // Update chart data based on selected period
-    this.chart.data.labels = this.generateTimeLabels();
-    this.chart.data.datasets[0].data = this.generatePriceData();
-    this.chart.update();
-  }
-  
-  private generateTimeLabels(): string[] {
-    // Generate time labels based on selected period
-    const labels: string[] = [];
-    const now = new Date();
-    let format: Intl.DateTimeFormatOptions;
-    let count: number;
-    
-    switch (this.selectedPeriod) {
-      case 'day':
-        format = { hour: '2-digit', minute: '2-digit' };
-        count = 24;
-        for (let i = 0; i < count; i++) {
-          const date = new Date(now);
-          date.setHours(date.getHours() - (count - i));
-          labels.push(date.toLocaleTimeString('fr-FR', format));
-        }
-        break;
-      case 'week':
-        format = { weekday: 'short' };
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date(now);
-          date.setDate(date.getDate() - i);
-          labels.push(date.toLocaleDateString('fr-FR', format));
-        }
-        break;
-      case 'month':
-        format = { day: '2-digit', month: 'short' };
-        for (let i = 29; i >= 0; i--) {
-          const date = new Date(now);
-          date.setDate(date.getDate() - i);
-          labels.push(date.toLocaleDateString('fr-FR', format));
-        }
-        break;
-      case 'quarter':
-        format = { day: '2-digit', month: 'short' };
-        for (let i = 0; i < 3; i++) {
-          for (let j = 1; j <= 30; j += 10) {
-            const date = new Date(now);
-            date.setMonth(date.getMonth() - 2 + i);
-            date.setDate(j);
-            labels.push(date.toLocaleDateString('fr-FR', format));
-          }
-        }
-        break;
-      case 'year':
-        format = { month: 'short' };
-        for (let i = 11; i >= 0; i--) {
-          const date = new Date(now);
-          date.setMonth(date.getMonth() - i);
-          labels.push(date.toLocaleDateString('fr-FR', format));
-        }
-        break;
-    }
-    
-    return labels;
-  }
-  
-  private generatePriceData(): number[] {
-    // Generate price data based on current stock price
-    // This is for demo purposes only
-    if (!this.stock) return [];
-    
-    const basePrice = this.stock.close;
-    const volatility = basePrice * 0.03; // 3% volatility
-    const trend = this.stock.change / 100; // Use current change as trend direction
-    
-    let dataPoints = 0;
-    switch (this.selectedPeriod) {
-      case 'day': dataPoints = 24; break;
-      case 'week': dataPoints = 7; break;
-      case 'month': dataPoints = 30; break;
-      case 'quarter': dataPoints = 9; break;
-      case 'year': dataPoints = 12; break;
-    }
-    
-    const data: number[] = [];
-    let lastPrice = basePrice - (basePrice * trend * 1.5); // Start with a price that will trend toward current price
-    
-    for (let i = 0; i < dataPoints; i++) {
-      const randomChange = (Math.random() - 0.5) * volatility;
-      const trendChange = basePrice * trend * (1 / dataPoints);
-      lastPrice = lastPrice + randomChange + trendChange;
-      lastPrice = Math.max(lastPrice, basePrice * 0.7); // Prevent going too low
-      data.push(parseFloat(lastPrice.toFixed(2)));
-    }
-    
-    // Ensure the last point matches the current price
-    data[dataPoints - 1] = basePrice;
-    
-    return data;
   }
 }
