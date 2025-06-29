@@ -11,8 +11,21 @@ import { catchError, forkJoin, map, of } from 'rxjs';
   imports: [CommonModule, StockCardComponent],
   template: `
     <div class="mb-8">
-      <h1 class="text-3xl font-bold">Nasdaq Stock Exchange</h1>
-      <p class="text-neutral-600">Track the latest stock movements from the Euronext Nasdaq exchange.</p>
+      <h1 class="text-3xl font-bold">{{ currentExchange === 'nasdaq' ? 'Nasdaq Stock Exchange' : 'CAC40 Stock Exchange' }}</h1>
+      <p class="text-neutral-600">Track the latest stock movements.</p>
+    </div>
+
+    <div class="mb-4">
+      <button (click)="switchExchange('nasdaq')" 
+              [ngClass]="{'bg-primary-500 text-white': currentExchange === 'nasdaq', 'bg-white': currentExchange !== 'nasdaq'}"
+              class="px-4 py-2 rounded-md mr-2">
+        NASDAQ
+      </button>
+      <button (click)="switchExchange('cac40')" 
+              [ngClass]="{'bg-primary-500 text-white': currentExchange === 'cac40', 'bg-white': currentExchange !== 'cac40'}"
+              class="px-4 py-2 rounded-md">
+        CAC40
+      </button>
     </div>
     
     @if (loading) {
@@ -32,7 +45,7 @@ import { catchError, forkJoin, map, of } from 'rxjs';
           <app-stock-card [stock]="stock"></app-stock-card>
         } @empty {
           <div class="col-span-full text-center py-12 text-neutral-500">
-            No stocks found. Try searching for a specific company.
+            No stocks found.
           </div>
         }
       </div>
@@ -43,20 +56,29 @@ export class DashboardComponent implements OnInit {
   stocks: StockDetail[] = [];
   loading = true;
   error = '';
+  currentExchange: 'nasdaq' | 'cac40' = 'nasdaq';
   
   constructor(private stockService: StockService) {}
   
   ngOnInit(): void {
-    this.loadFeaturedStocks();
+    this.loadStocks();
+  }
+
+  switchExchange(exchange: 'nasdaq' | 'cac40'): void {
+    this.currentExchange = exchange;
+    this.loadStocks();
   }
   
-  loadFeaturedStocks(): void {
+  loadStocks(): void {
     this.loading = true;
     this.error = '';
     
-    // Get featured stock symbols
-    this.stockService.getDefaultStocks().pipe(
-      map(stocks => stocks.slice(0, 9)), // Limit to first 9 stocks
+    const stockList$ = this.currentExchange === 'nasdaq' 
+      ? this.stockService.getDefaultStocks() 
+      : this.stockService.getCac40Stocks();
+
+    stockList$.pipe(
+      map(stocks => stocks.slice(0, 9)),
       catchError(() => {
         this.error = 'Failed to load stock list. Please try again later.';
         return of([]);
@@ -67,7 +89,6 @@ export class DashboardComponent implements OnInit {
         return;
       }
       
-      // Load details for each stock
       const stockRequests = stocks.map(stock => 
         this.stockService.getStockDetail(stock.symbol).pipe(
           catchError(() => of(null))

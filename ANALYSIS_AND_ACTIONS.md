@@ -1,4 +1,4 @@
-# Analyse et Actions de l'Application Stock-App
+# Analyse et Actions de l'Application TradeMind
 
 ## 1. Analyse de l'Architecture Initiale
 
@@ -84,8 +84,13 @@ Ceci démarrera à la fois:
 *   **Affichage des données historiques par intervalle de 15 minutes** (Voir CHANGELOG #001)
 *   **Affichage des données historiques avec intervalles 1m, 5m et 15m** (Voir CHANGELOG #003)
 *   **Affichage des données historiques sur plusieurs périodes et intervalles** (Voir CHANGELOG #004)
+*   **Ajout des cotations du CAC40** (Voir CHANGELOG #007)
 
-## 3. Résolution des Problèmes
+## 3. Actions Stratégiques
+
+*   **Renommage de l'application en "TradeMind"** (Voir CHANGELOG #008)
+
+## 4. Résolution des Problèmes
 
 ### Problème: Erreurs de récupération de données yfinance
 

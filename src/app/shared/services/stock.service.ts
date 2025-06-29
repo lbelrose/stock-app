@@ -44,6 +44,12 @@ export class StockService {
     return this.searchStocks('');
   }
 
+  getCac40Stocks(): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/cac40`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
   getStockHistory(symbol: string, period: string = '1d', interval: string = '15m'): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/stock/${symbol}/history?period=${period}&interval=${interval}`).pipe(
       catchError(error => {

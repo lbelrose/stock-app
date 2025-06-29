@@ -103,6 +103,49 @@ def search_stocks():
     
     return jsonify(nasdaq_stocks[:10])  # Return first 10 if no query
 
+@app.route('/api/stocks/cac40', methods=['GET'])
+def get_cac40_stocks():
+    cac40_stocks = [
+        {"symbol": "AI.PA", "name": "Air Liquide"},
+        {"symbol": "AIR.PA", "name": "Airbus"},
+        {"symbol": "ALO.PA", "name": "Alstom"},
+        {"symbol": "MT.AS", "name": "ArcelorMittal"},
+        {"symbol": "CS.PA", "name": "AXA"},
+        {"symbol": "BNP.PA", "name": "BNP Paribas"},
+        {"symbol": "EN.PA", "name": "Bouygues"},
+        {"symbol": "CAP.PA", "name": "Capgemini"},
+        {"symbol": "CA.PA", "name": "Carrefour"},
+        {"symbol": "ACA.PA", "name": "Crédit Agricole"},
+        {"symbol": "BN.PA", "name": "Danone"},
+        {"symbol": "DSY.PA", "name": "Dassault Systèmes"},
+        {"symbol": "EDEN.PA", "name": "Edenred"},
+        {"symbol": "EL.PA", "name": "EssilorLuxottica"},
+        {"symbol": "ERF.PA", "name": "Eurofins Scientific"},
+        {"symbol": "RMS.PA", "name": "Hermès International"},
+        {"symbol": "KER.PA", "name": "Kering"},
+        {"symbol": "OR.PA", "name": "L'Oréal"},
+        {"symbol": "LR.PA", "name": "Legrand"},
+        {"symbol": "MC.PA", "name": "LVMH"},
+        {"symbol": "ML.PA", "name": "Michelin"},
+        {"symbol": "ORA.PA", "name": "Orange"},
+        {"symbol": "RI.PA", "name": "Pernod Ricard"},
+        {"symbol": "PUB.PA", "name": "Publicis Groupe"},
+        {"symbol": "RNO.PA", "name": "Renault"},
+        {"symbol": "SAF.PA", "name": "Safran"},
+        {"symbol": "SGO.PA", "name": "Saint-Gobain"},
+        {"symbol": "SAN.PA", "name": "Sanofi"},
+        {"symbol": "SU.PA", "name": "Schneider Electric"},
+        {"symbol": "STLAP.PA", "name": "Stellantis"},
+        {"symbol": "STMPA.PA", "name": "STMicroelectronics"},
+        {"symbol": "TEP.PA", "name": "Teleperformance"},
+        {"symbol": "TTE.PA", "name": "TotalEnergies"},
+        {"symbol": "HO.PA", "name": "Thales"},
+        {"symbol": "URW.AS", "name": "Unibail-Rodamco-Westfield"},
+        {"symbol": "VIE.PA", "name": "Veolia Environnement"},
+        {"symbol": "DG.PA", "name": "Vinci"}
+    ]
+    return jsonify(cac40_stocks)
+
 def calculate_rsi(prices, periods=14):
     import numpy as np
     

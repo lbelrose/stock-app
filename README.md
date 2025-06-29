@@ -1,15 +1,20 @@
-# Nasdaq Stock Tracker
+# TradeMind
 
-A real-time stock tracking application for the Nasdaq Stock Exchange using Angular 19, Python, and TradingView API.
+A real-time stock tracking application for the Nasdaq and CAC40 Stock Exchanges, with a focus on AI-driven analysis and alerts. This application uses Angular 19, Python, and yfinance.
 
 ## Features
 
-- Real-time stock quotes from Nasdaq
+- Real-time stock quotes from Nasdaq and CAC40
 - Interactive stock charts with multiple timeframes
 - Stock search functionality
 - Watchlist management
 - Technical indicators (RSI, MACD)
 - Responsive design for all devices
+
+## Future Features
+
+- AI-powered analysis of stock data
+- Real-time buy/sell opportunity alerts
 
 ## Prerequisites
 
@@ -59,7 +64,7 @@ This will start both:
 - Angular 19
 - TailwindCSS
 - Python Flask
-- TradingView Technical Analysis Library
+- yfinance
 - Chart.js
 
 ## License
