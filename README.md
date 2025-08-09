@@ -50,7 +50,10 @@ This will start both:
 ```
 ├── src/                    # Angular frontend
 │   ├── api/                    # Python backend
-│   │   ├── app.py              # Flask application
+│   │   ├── stocks/             # Stocks feature module
+│   │   │   ├── routes.py       # Stock API routes
+│   │   │   └── services.py     # Stock data logic
+│   │   ├── app.py              # Main Flask application
 │   │   └── requirements.txt    # Python dependencies
 │   ├── app/                    # Application components
 │   │   ├── features/           # Feature modules

@@ -60,15 +60,20 @@ Ceci démarrera à la fois:
 
 ### Structure du Projet
 ```
-├── src/                    # Angular frontend
+├── src/                        # Angular frontend
 │   ├── api/                    # Python backend
-│   │   ├── app.py             # Flask application
+│   │   ├── stocks/             # Stocks feature module
+│   │   │   ├── routes.py       # Blueprint for stock routes
+│   │   │   ├── services.py     # Business logic for stocks
+│   │   │   └── tests/          # Tests for the stocks module
+│   │   ├── app.py              # Flask application factory
+│   │   ├── test_app.py         # Integration tests
 │   │   └── requirements.txt    # Python dependencies
-│   ├── app/               # Application components
-│   │   ├── features/      # Feature modules
-│   │   └── shared/        # Shared components
-│   └── assets/            # Static assets
-└── package.json           # Node.js dependencies
+│   ├── app/                    # Application components
+│   │   ├── features/           # Feature modules
+│   │   └── shared/             # Shared components
+│   └── assets/                 # Static assets
+└── package.json                # Node.js dependencies
 ```
 
 ### Axes d'Amélioration (pour la production)
