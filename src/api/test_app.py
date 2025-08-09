@@ -91,7 +91,7 @@ def test_get_stock_history_no_data(client):
         assert 'No historical data for UNKNOWN with period=1d and interval=15m' in data['error']
 
 def test_search_stocks_query(client):
-    response = client.get('/api/search?q=apple')
+    response = client.get('/api/stocks/search?q=apple')
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)
@@ -99,7 +99,7 @@ def test_search_stocks_query(client):
     assert any(stock['symbol'] == 'AAPL' for stock in data)
 
 def test_search_stocks_no_query(client):
-    response = client.get('/api/search')
+    response = client.get('/api/stocks/search')
     assert response.status_code == 200
     data = response.get_json()
     assert isinstance(data, list)

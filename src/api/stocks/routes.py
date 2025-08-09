@@ -23,7 +23,7 @@ def get_stock_history(symbol):
         return jsonify({'error': error}), status_code
     return jsonify(data)
 
-@stocks_bp.route('/search', methods=['GET'])
+@stocks_bp.route('/stocks/search', methods=['GET'])
 def search_stocks():
     query = request.args.get('q', '')
     results = services.search_stocks(query)

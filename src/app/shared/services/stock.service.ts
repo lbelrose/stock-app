@@ -13,7 +13,7 @@ export class StockService {
   constructor(private http: HttpClient) {}
   
   searchStocks(query: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/search?q=${query}`).pipe(
+    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/search?q=${query}`).pipe(
       catchError(() => of([]))
     );
   }
