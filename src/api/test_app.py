@@ -1,14 +1,20 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app import app
+from .app import create_app
 import pandas as pd
 from datetime import datetime
 
 @pytest.fixture
-def client():
-    app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
+def app():
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+    })
+    yield app
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
 
 def test_get_stock_data_success(client):
     with patch('yfinance.Ticker') as mock_ticker:
@@ -82,7 +88,7 @@ def test_get_stock_history_no_data(client):
         assert response.status_code == 404
         data = response.get_json()
         assert 'error' in data
-        assert 'No historical data found for UNKNOWN' in data['error']
+        assert 'No historical data for UNKNOWN with period=1d and interval=15m' in data['error']
 
 def test_search_stocks_query(client):
     response = client.get('/api/search?q=apple')
