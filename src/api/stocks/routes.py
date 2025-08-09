@@ -3,7 +3,7 @@ from . import services
 
 stocks_bp = Blueprint('stocks', __name__, url_prefix='/api')
 
-@stocks_bp.route('/stock/<symbol>', methods=['GET'])
+@stocks_bp.route('/stocks/<symbol>', methods=['GET'])
 def get_stock_data(symbol):
     data, error = services.get_stock_data(symbol)
     if error:
@@ -12,7 +12,7 @@ def get_stock_data(symbol):
         return jsonify({'error': error}), status_code
     return jsonify(data)
 
-@stocks_bp.route('/stock/<symbol>/history', methods=['GET'])
+@stocks_bp.route('/stocks/<symbol>/history', methods=['GET'])
 def get_stock_history(symbol):
     period = request.args.get('period', '1d')
     interval = request.args.get('interval', '15m')

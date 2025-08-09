@@ -33,7 +33,7 @@ def test_get_stock_data_success(client):
         # Mock info data
         mock_ticker.return_value.info = {'longName': 'Apple Inc.', 'recommendationKey': 'BUY'}
 
-        response = client.get('/api/stock/AAPL')
+        response = client.get('/api/stocks/AAPL')
         assert response.status_code == 200
         data = response.get_json()
         assert data['symbol'] == 'AAPL'
@@ -47,7 +47,7 @@ def test_get_stock_data_no_data(client):
     with patch('yfinance.Ticker') as mock_ticker:
         mock_ticker.return_value.history.return_value = pd.DataFrame() # Simulate empty DataFrame
 
-        response = client.get('/api/stock/UNKNOWN')
+        response = client.get('/api/stocks/UNKNOWN')
         assert response.status_code == 404
         data = response.get_json()
         assert 'error' in data
@@ -70,7 +70,7 @@ def test_get_stock_history_success(client):
         
         mock_ticker.return_value.history.return_value = mock_hist_df
 
-        response = client.get('/api/stock/AAPL/history?period=1d&interval=15m')
+        response = client.get('/api/stocks/AAPL/history?period=1d&interval=15m')
         assert response.status_code == 200
         data = response.get_json()
         assert isinstance(data, list)
@@ -84,7 +84,7 @@ def test_get_stock_history_no_data(client):
     with patch('yfinance.Ticker') as mock_ticker:
         mock_ticker.return_value.history.return_value = pd.DataFrame() # Simulate empty DataFrame
 
-        response = client.get('/api/stock/UNKNOWN/history?period=1d&interval=15m')
+        response = client.get('/api/stocks/UNKNOWN/history?period=1d&interval=15m')
         assert response.status_code == 404
         data = response.get_json()
         assert 'error' in data
