@@ -46,7 +46,7 @@ Le frontend Angular communique avec le backend Flask via des requêtes HTTP REST
     ```
 2.  Installer les dépendances Python:
     ```bash
-    pip install -r api/requirements.txt
+    pip install -r src/api/requirements.txt
     ```
 
 **Développement:**
@@ -60,10 +60,10 @@ Ceci démarrera à la fois:
 
 ### Structure du Projet
 ```
-├── api/                    # Python backend
-│   ├── app.py             # Flask application
-│   └── requirements.txt    # Python dependencies
 ├── src/                    # Angular frontend
+│   ├── api/                    # Python backend
+│   │   ├── app.py             # Flask application
+│   │   └── requirements.txt    # Python dependencies
 │   ├── app/               # Application components
 │   │   ├── features/      # Feature modules
 │   │   └── shared/        # Shared components

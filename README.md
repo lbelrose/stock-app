@@ -31,7 +31,7 @@ npm install
 
 2. Install Python dependencies:
 ```bash
-pip install -r api/requirements.txt
+pip install -r src/api/requirements.txt
 ```
 
 ## Development
@@ -48,15 +48,15 @@ This will start both:
 ## Project Structure
 
 ```
-├── api/                    # Python backend
-│   ├── app.py             # Flask application
-│   └── requirements.txt    # Python dependencies
 ├── src/                    # Angular frontend
-│   ├── app/               # Application components
-│   │   ├── features/      # Feature modules
-│   │   └── shared/        # Shared components
-│   └── assets/            # Static assets
-└── package.json           # Node.js dependencies
+│   ├── api/                    # Python backend
+│   │   ├── app.py              # Flask application
+│   │   └── requirements.txt    # Python dependencies
+│   ├── app/                    # Application components
+│   │   ├── features/           # Feature modules
+│   │   └── shared/             # Shared components
+│   └── assets/                 # Static assets
+└── package.json                # Node.js dependencies
 ```
 
 ## Technologies
