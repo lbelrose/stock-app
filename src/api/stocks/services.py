@@ -1,6 +1,21 @@
 import yfinance as yf
 import logging
 import numpy as np
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from datetime import datetime, timedelta
+
+# --- Caching Mechanism ---
+_nasdaq_stocks_cache = {
+    "timestamp": None,
+    "data": []
+}
+_cac40_stocks_cache = {
+    "timestamp": None,
+    "data": []
+}
+CACHE_DURATION = timedelta(hours=24)
 
 def get_stock_data(symbol: str):
     """
@@ -65,59 +80,108 @@ def get_stock_history(symbol: str, period: str, interval: str):
         logging.error(f"Error fetching historical data for {symbol}: {str(e)}")
         return None, str(e)
 
-def search_stocks(query: str):
+def get_nasdaq_stocks():
     """
-    Searches for stocks based on a query.
+    Fetches the list of NASDAQ-listed stocks from the official NASDAQ FTP server.
+    Uses a 24-hour cache to avoid excessive downloads.
     """
-    nasdaq_stocks = [
-        {"symbol": "AAPL", "name": "Apple Inc."},
-        {"symbol": "MSFT", "name": "Microsoft Corporation"},
-        {"symbol": "AMZN", "name": "Amazon.com Inc."},
-        {"symbol": "GOOGL", "name": "Alphabet Inc."},
-        {"symbol": "META", "name": "Meta Platforms Inc."},
-        {"symbol": "TSLA", "name": "Tesla, Inc."},
-        {"symbol": "NVDA", "name": "NVIDIA Corporation"},
-        {"symbol": "AMD", "name": "Advanced Micro Devices"},
-        {"symbol": "INTC", "name": "Intel Corporation"},
-        {"symbol": "ORCL", "name": "Oracle Corporation"},
-        {"symbol": "CSCO", "name": "Cisco Systems Inc."},
-        {"symbol": "ADBE", "name": "Adobe Inc."},
-        {"symbol": "NFLX", "name": "Netflix Inc."},
-        {"symbol": "PYPL", "name": "PayPal Holdings Inc."},
-    ]
-    if query:
-        query = query.lower()
-        return [
-            stock for stock in nasdaq_stocks 
-            if query in stock['symbol'].lower() or query in stock['name'].lower()
-        ][:10]
-    return nasdaq_stocks[:10]
+    now = datetime.now()
+    if _nasdaq_stocks_cache["timestamp"] and (now - _nasdaq_stocks_cache["timestamp"] < CACHE_DURATION):
+        logging.info("Returning cached NASDAQ stocks.")
+        return _nasdaq_stocks_cache["data"]
+
+    logging.info("Fetching fresh NASDAQ stocks.")
+    try:
+        url = "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt"
+        df = pd.read_csv(url, sep='|', skipfooter=1, engine='python')
+        df = df[['Symbol', 'Security Name']]
+        df.rename(columns={'Security Name': 'name', 'Symbol': 'symbol'}, inplace=True)
+        
+        # Filter out test stocks, warrants, and convert to dictionary
+        df = df[~df['symbol'].str.contains('\$|\.')]
+        all_stocks = df.to_dict('records')
+        
+        # Ensure symbol and name are valid strings
+        stocks = [
+            stock for stock in all_stocks 
+            if (isinstance(stock.get('symbol'), str) and stock.get('symbol')) and \
+               (isinstance(stock.get('name'), str) and stock.get('name'))
+        ]
+        
+        _nasdaq_stocks_cache["data"] = stocks
+        _nasdaq_stocks_cache["timestamp"] = now
+        logging.info(f"Successfully fetched and cached {len(stocks)} NASDAQ stocks.")
+        return stocks
+    except Exception as e:
+        logging.error(f"Failed to fetch or parse NASDAQ stocks list: {e}")
+        return _nasdaq_stocks_cache["data"] if _nasdaq_stocks_cache["data"] else []
 
 def get_cac40_stocks():
     """
-    Returns a list of CAC40 stocks.
+    Scrapes the CAC 40 components from the Wikipedia page.
+    Uses a 24-hour cache.
     """
-    return [
-        {"symbol": "AI.PA", "name": "Air Liquide"}, {"symbol": "AIR.PA", "name": "Airbus"},
-        {"symbol": "ALO.PA", "name": "Alstom"}, {"symbol": "MT.AS", "name": "ArcelorMittal"},
-        {"symbol": "CS.PA", "name": "AXA"}, {"symbol": "BNP.PA", "name": "BNP Paribas"},
-        {"symbol": "EN.PA", "name": "Bouygues"}, {"symbol": "CAP.PA", "name": "Capgemini"},
-        {"symbol": "CA.PA", "name": "Carrefour"}, {"symbol": "ACA.PA", "name": "Crédit Agricole"},
-        {"symbol": "BN.PA", "name": "Danone"}, {"symbol": "DSY.PA", "name": "Dassault Systèmes"},
-        {"symbol": "EDEN.PA", "name": "Edenred"}, {"symbol": "EL.PA", "name": "EssilorLuxottica"},
-        {"symbol": "ERF.PA", "name": "Eurofins Scientific"}, {"symbol": "RMS.PA", "name": "Hermès"},
-        {"symbol": "KER.PA", "name": "Kering"}, {"symbol": "OR.PA", "name": "L'Oréal"},
-        {"symbol": "LR.PA", "name": "Legrand"}, {"symbol": "MC.PA", "name": "LVMH"},
-        {"symbol": "ML.PA", "name": "Michelin"}, {"symbol": "ORA.PA", "name": "Orange"},
-        {"symbol": "RI.PA", "name": "Pernod Ricard"}, {"symbol": "PUB.PA", "name": "Publicis"},
-        {"symbol": "RNO.PA", "name": "Renault"}, {"symbol": "SAF.PA", "name": "Safran"},
-        {"symbol": "SGO.PA", "name": "Saint-Gobain"}, {"symbol": "SAN.PA", "name": "Sanofi"},
-        {"symbol": "SU.PA", "name": "Schneider Electric"}, {"symbol": "STLAP.PA", "name": "Stellantis"},
-        {"symbol": "STMPA.PA", "name": "STMicroelectronics"}, {"symbol": "TEP.PA", "name": "Teleperformance"},
-        {"symbol": "TTE.PA", "name": "TotalEnergies"}, {"symbol": "HO.PA", "name": "Thales"},
-        {"symbol": "URW.AS", "name": "Unibail-Rodamco-Westfield"}, {"symbol": "VIE.PA", "name": "Veolia"},
-        {"symbol": "DG.PA", "name": "Vinci"}
+    now = datetime.now()
+    if _cac40_stocks_cache["timestamp"] and (now - _cac40_stocks_cache["timestamp"] < CACHE_DURATION):
+        logging.info("Returning cached CAC40 stocks.")
+        return _cac40_stocks_cache["data"]
+    
+    logging.info("Fetching fresh CAC40 stocks.")
+    try:
+        url = "https://en.wikipedia.org/wiki/CAC_40"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+        table = soup.find('table', {'id': 'constituents'})
+        if not table:
+            logging.error("Could not find the constituents table on Wikipedia.")
+            return []
+
+        stocks = []
+        for row in table.find_all('tr')[1:]:
+            cells = row.find_all('td')
+            if len(cells) > 2:
+                company_name = cells[0].text.strip()
+                ticker_symbol = cells[2].text.strip()
+                
+                # Ensure both are valid strings before proceeding
+                if not (isinstance(company_name, str) and company_name and \
+                        isinstance(ticker_symbol, str) and ticker_symbol):
+                    continue
+
+                if not ticker_symbol.endswith('.PA'):
+                    ticker_symbol += '.PA'
+                stocks.append({'name': company_name, 'symbol': ticker_symbol})
+        
+        _cac40_stocks_cache["data"] = stocks
+        _cac40_stocks_cache["timestamp"] = now
+        logging.info(f"Successfully scraped and cached {len(stocks)} CAC40 stocks.")
+        return stocks
+    except Exception as e:
+        logging.error(f"An error occurred while scraping CAC40 stocks: {e}")
+        return _cac40_stocks_cache["data"] if _cac40_stocks_cache["data"] else []
+
+def search_stocks(query: str):
+    """
+    Searches for stocks based on a query from a combined list of
+    dynamically fetched NASDAQ and CAC40 stocks.
+    """
+    nasdaq_stocks = get_nasdaq_stocks()
+    cac40_stocks = get_cac40_stocks()
+    combined_stocks = nasdaq_stocks + cac40_stocks
+    
+    if not query:
+        return nasdaq_stocks[:20]
+
+    query = query.lower()
+    results = [
+        stock for stock in combined_stocks
+        if query in stock['symbol'].lower() or query in stock['name'].lower()
     ]
+    
+    return results[:20]
 
 # Helper functions (private)
 def _calculate_rsi(prices, periods=14):

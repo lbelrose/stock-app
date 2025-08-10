@@ -91,17 +91,26 @@ def test_get_stock_history_no_data(client):
         assert 'No historical data for UNKNOWN with period=1d and interval=15m' in data['error']
 
 def test_search_stocks_query(client):
-    response = client.get('/api/stocks/search?q=apple')
-    assert response.status_code == 200
-    data = response.get_json()
-    assert isinstance(data, list)
-    assert len(data) > 0
-    assert any(stock['symbol'] == 'AAPL' for stock in data)
+    with patch('api.stocks.services.get_nasdaq_stocks') as mock_nasdaq, patch('api.stocks.services.get_cac40_stocks') as mock_cac40:
+        
+        mock_nasdaq.return_value = [{"symbol": "AAPL", "name": "Apple Inc."}]
+        mock_cac40.return_value = [{"symbol": "RMS.PA", "name": "Hermès Intl"}]
+        
+        response = client.get('/api/stocks/search?q=AAPL')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 1
+        assert data[0]['symbol'] == 'AAPL'
 
 def test_search_stocks_no_query(client):
-    response = client.get('/api/stocks/search')
-    assert response.status_code == 200
-    data = response.get_json()
-    assert isinstance(data, list)
-    assert len(data) > 0
-    assert len(data) <= 10 # Should return first 10 default stocks
+    with patch('api.stocks.services.get_nasdaq_stocks') as mock_nasdaq:
+        mock_nasdaq.return_value = [{"symbol": f"TEST{i}", "name": f"Test Stock {i}"} for i in range(25)]
+        
+        response = client.get('/api/stocks/search')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert len(data) == 20 # Should return first 20 default stocks
+        assert data[0]['symbol'] == 'TEST0'
+
+        assert data[0]['symbol'] == 'TEST0'
+
