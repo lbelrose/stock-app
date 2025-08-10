@@ -103,7 +103,7 @@ def test_search_stocks_query(client):
         assert data[0]['symbol'] == 'AAPL'
 
 def test_search_stocks_no_query(client):
-    with patch('api.stocks.services.get_nasdaq_stocks') as mock_nasdaq:
+    with patch('src.api.stocks.services.get_nasdaq_stocks') as mock_nasdaq:
         mock_nasdaq.return_value = [{"symbol": f"TEST{i}", "name": f"Test Stock {i}"} for i in range(25)]
         
         response = client.get('/api/stocks/search')

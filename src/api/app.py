@@ -1,6 +1,12 @@
 from flask import Flask
 from flask_cors import CORS
-from .stocks.routes import stocks_bp
+from stocks.routes import stocks_bp
+import os
+import sys
+
+# Add the parent directory to the path to allow relative imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 def create_app():
     """
