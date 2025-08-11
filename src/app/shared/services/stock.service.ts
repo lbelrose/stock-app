@@ -13,7 +13,8 @@ export class StockService {
   constructor(private http: HttpClient) {}
   
   searchStocks(query: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/search?q=${query}`).pipe(
+    const urlQuery = query ? `?q=${query}` : '';
+    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/search${urlQuery}`).pipe(
       catchError(() => of([]))
     );
   }

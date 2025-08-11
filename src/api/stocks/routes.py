@@ -31,5 +31,5 @@ def search_stocks():
 
 @stocks_bp.route('/stocks/cac40', methods=['GET'])
 def get_cac40_stocks():
-    stocks = services.get_cac40_stocks()
+    stocks = services.get_stocks('CAC40')
     return jsonify(stocks)

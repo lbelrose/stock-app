@@ -8,6 +8,9 @@
     "api": "python src/api/app.py",
     "dev": "concurrently \"npm run start\" \"npm run api\""
   },
+  "directories": {
+    "api": "src/api"
+  },
   "dependencies": {
     "@angular/animations": "^19.2.0",
     "@angular/common": "^19.2.0",
