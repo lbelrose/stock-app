@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 012 - Passage aux Fichiers CSV Locaux pour les Listes d'Actions
+
+Remplacement de la récupération dynamique des listes d'actions (NASDAQ et CAC40)
+par des fichiers CSV locaux. Cette approche améliore considérablement la
+fiabilité et la performance de l'application en la rendant indépendante
+des services externes. Le code du backend a été simplifié en conséquence.
+
 ## 011 - Pluralisation des routes de l'API
 
 Mise à jour des routes de l'API de `/api/stock/` à `/api/stocks/`

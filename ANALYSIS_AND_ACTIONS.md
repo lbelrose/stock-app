@@ -66,6 +66,8 @@ Ceci démarrera à la fois:
 │   │   │   ├── routes.py       # Blueprint for stock routes
 │   │   │   ├── services.py     # Business logic for stocks
 │   │   │   └── tests/          # Tests for the stocks module
+│   │   ├── models/             # Data models and static files
+│   │   │   └── markets/        # CSV files for markets
 │   │   ├── app.py              # Flask application factory
 │   │   ├── test_app.py         # Integration tests
 │   │   └── requirements.txt    # Python dependencies

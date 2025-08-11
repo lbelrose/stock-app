@@ -48,11 +48,12 @@ This will start both:
 ## Project Structure
 
 ```
-├── src/                    # Angular frontend
+├── src/                        # Angular frontend
 │   ├── api/                    # Python backend
 │   │   ├── stocks/             # Stocks feature module
 │   │   │   ├── routes.py       # Stock API routes
 │   │   │   └── services.py     # Stock data logic
+│   │   ├── models/             # CSV data files
 │   │   ├── app.py              # Main Flask application
 │   │   └── requirements.txt    # Python dependencies
 │   ├── app/                    # Application components
