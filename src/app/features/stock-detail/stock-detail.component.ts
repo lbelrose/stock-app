@@ -1,16 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { StockService } from '../../shared/services/stock.service';
 import { WatchlistService } from '../../shared/services/watchlist.service';
-import { StockDetail } from '../../shared/models/stock.model';
+import { StockDetail, StockPrediction } from '../../shared/models/stock.model';
 import { StockChartComponent } from './stock-chart/stock-chart.component';
 
 @Component({
   selector: 'app-stock-detail',
   standalone: true,
-  imports: [CommonModule, StockChartComponent],
+  imports: [CommonModule, StockChartComponent, RouterLink],
   template: `
     <div class="mb-6">
       <div class="flex items-center gap-2 text-neutral-500 mb-2">
@@ -83,7 +83,7 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
           </div>
         </div>
         
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mt-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
           <div class="bg-neutral-50 p-4 rounded-lg">
             <p class="text-neutral-500 text-sm mb-1">RSI</p>
             <p class="text-xl font-medium">{{ stock.rsi | number:'1.1-1' }}</p>
@@ -107,6 +107,22 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
               {{ formatRecommendation(stock.recommendation) }}
             </span>
           </div>
+          <div class="bg-primary-50 border border-primary-200 p-4 rounded-lg">
+            <p class="text-primary-700 text-sm mb-1 font-semibold">AI Prediction</p>
+            @if (prediction) {
+              <div class="flex items-center gap-2">
+                <span [ngClass]="getPredictionClass()" class="badge text-base px-3 py-1">
+                  {{ prediction.signal }}
+                </span>
+                <span class="text-primary-800 font-medium">
+                  ({{ prediction.confidence | percent }})
+                </span>
+              </div>
+              <p class="text-xs text-primary-600 mt-1">Model: {{ prediction.model_status }}</p>
+            } @else {
+              <div class="h-6 bg-neutral-100 rounded w-1/2 animate-pulse"></div>
+            }
+          </div>
         </div>
       </div>
     }
@@ -115,6 +131,7 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
 export class StockDetailComponent implements OnInit, OnDestroy {
   symbol = '';
   stock: StockDetail | null = null;
+  prediction: StockPrediction | null = null;
   loading = true;
   error = '';
   isInWatchlist = false;
@@ -150,9 +167,15 @@ export class StockDetailComponent implements OnInit, OnDestroy {
   loadStockData(symbol: string): void {
     this.loading = true;
     this.error = '';
+    this.prediction = null;
     
     this.stockService.getStockDetail(symbol).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      tap(() => {
+        this.stockService.getPrediction(symbol).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe(prediction => this.prediction = prediction);
+      })
     ).subscribe({
       next: (data) => {
         this.stock = data;
@@ -184,6 +207,19 @@ export class StockDetailComponent implements OnInit, OnDestroy {
     if (rec === 'STRONG_BUY' || rec === 'BUY') {
       return 'badge-positive';
     } else if (rec === 'STRONG_SELL' || rec === 'SELL') {
+      return 'badge-negative';
+    } else {
+      return 'bg-neutral-100 text-neutral-700';
+    }
+  }
+
+  getPredictionClass(): string {
+    if (!this.prediction) return '';
+    
+    const sig = this.prediction.signal;
+    if (sig === 'BUY') {
+      return 'badge-positive';
+    } else if (sig === 'SELL') {
       return 'badge-negative';
     } else {
       return 'bg-neutral-100 text-neutral-700';

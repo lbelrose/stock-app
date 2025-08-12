@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from stocks.routes import stocks_bp
+from analysis.routes import analysis_bp  # Import the new blueprint
 import os
 import sys
 
@@ -17,6 +18,7 @@ def create_app():
 
     # Register the blueprint for the stocks API
     app.register_blueprint(stocks_bp)
+    app.register_blueprint(analysis_bp)  # Register the analysis blueprint
 
     return app
 

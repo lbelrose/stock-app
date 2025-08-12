@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, map, tap } from 'rxjs';
-import { Stock, StockDetail } from '../models/stock.model';
+import { Stock, StockDetail, StockPrediction } from '../models/stock.model';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +56,21 @@ export class StockService {
       catchError(error => {
         console.error(`Error fetching historical data for ${symbol}:`, error);
         throw new Error(`Unable to fetch historical data for ${symbol}`);
+      })
+    );
+  }
+
+  getPrediction(symbol: string): Observable<StockPrediction> {
+    return this.http.get<StockPrediction>(`${this.apiUrl}/analysis/${symbol}`).pipe(
+      catchError(error => {
+        console.error(`Error fetching prediction for ${symbol}:`, error);
+        // Return a default "error" prediction object
+        return of({ 
+          ticker: symbol, 
+          signal: 'ERROR', 
+          confidence: '0.00', 
+          model_status: 'offline' 
+        } as StockPrediction);
       })
     );
   }

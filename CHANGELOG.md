@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 013 - Intégration d'un Modèle de Prédiction par IA
+
+Intégration d'une nouvelle fonctionnalité de prédiction basée sur un modèle
+de Machine Learning (Random Forest).
+
+- **Analyse Externe:** Étude du projet `Alphon` pour inspirer l'approche.
+- **Création de Modèle:** Développement d'un script (`src/api/analysis/train_model.py`)
+  pour entraîner un modèle sur la base d'indicateurs techniques et le sauvegarder.
+- **Backend:** Création d'un nouveau service et d'une route d'API (`/api/analysis/<ticker>`)
+  pour servir les prédictions (Acheter/Vendre/Conserver) avec un score de confiance.
+- **Frontend:** Ajout d'une carte "AI Prediction" dans la vue de détail de l'action
+  pour afficher le signal et la confiance du modèle.
+- **Dépendances:** Ajout de `scikit-learn` et `joblib` au backend.
+
 ## 012 - Passage aux Fichiers CSV Locaux pour les Listes d'Actions
 
 Remplacement de la récupération dynamique des listes d'actions (NASDAQ et CAC40)

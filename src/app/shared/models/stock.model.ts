@@ -15,3 +15,11 @@ export interface StockDetail extends Stock {
   macd: number;
   timestamp?: number;
 }
+
+export interface StockPrediction {
+  ticker: string;
+  signal: 'BUY' | 'SELL' | 'HOLD' | 'ERROR';
+  confidence: string;
+  predicted_return?: string;
+  model_status: 'active' | 'dummy' | 'offline';
+}
