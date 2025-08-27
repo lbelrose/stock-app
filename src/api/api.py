@@ -5,9 +5,6 @@ from analysis.routes import analysis_bp  # Import the new blueprint
 import os
 import sys
 
-# Add the parent directory to the path to allow relative imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 
 def create_api():
     """

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-from markets.models import get_stocks as get_market_stocks
+from markets.services import get_stocks as get_market_stocks
 
 def get_stock_data(symbol: str):
     """
