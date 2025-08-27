@@ -68,8 +68,8 @@ Ceci démarrera à la fois:
 │   │   │   └── tests/          # Tests for the stocks module
 │   │   ├── models/             # Data models and static files
 │   │   │   └── markets/        # CSV files for markets
-│   │   ├── app.py              # Flask application factory
-│   │   ├── test_app.py         # Integration tests
+│   │   ├── api.py              # Flask application factory
+│   │   ├── test_api.py         # Integration tests
 │   │   └── requirements.txt    # Python dependencies
 │   ├── app/                    # Application components
 │   │   ├── features/           # Feature modules
@@ -135,7 +135,7 @@ MIT
     - **Action:** Création d'un nouveau module `analysis` dans `src/api`.
     - **Service:** `src/api/analysis/services.py` contient la `PredictionService` qui charge le modèle, récupère les dernières données pour un ticker, calcule les mêmes indicateurs, et retourne une prédiction.
     - **Route:** `src/api/analysis/routes.py` expose le service via l'endpoint `GET /api/analysis/<ticker>`.
-    - **Intégration:** Le nouveau blueprint est enregistré dans `app.py`.
+    - **Intégration:** Le nouveau blueprint est enregistré dans `api.py`.
 
 4.  **Développement du Frontend (Angular):**
     - **Action:** Mise à jour de `stock.model.ts` avec l'interface `StockPrediction`.

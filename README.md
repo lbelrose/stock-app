@@ -54,7 +54,7 @@ This will start both:
 │   │   │   ├── routes.py       # Stock API routes
 │   │   │   └── services.py     # Stock data logic
 │   │   ├── models/             # CSV data files
-│   │   ├── app.py              # Main Flask application
+│   │   ├── api.py              # Main Flask application
 │   │   └── requirements.txt    # Python dependencies
 │   ├── app/                    # Application components
 │   │   ├── features/           # Feature modules

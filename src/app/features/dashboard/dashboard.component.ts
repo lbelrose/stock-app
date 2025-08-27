@@ -73,9 +73,7 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    const stockList$ = this.currentExchange === 'nasdaq' 
-      ? this.stockService.getDefaultStocks() 
-      : this.stockService.getCac40Stocks();
+    const stockList$ = this.stockService.getMarketStocks(this.currentExchange.toUpperCase());
 
     stockList$.pipe(
       map(stocks => stocks.slice(0, 9)),

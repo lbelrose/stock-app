@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime, timedelta
 import os
-
+from markets.models import get_stocks as get_market_stocks
 
 def get_stock_data(symbol: str):
     """
@@ -71,25 +71,25 @@ def get_stock_history(symbol: str, period: str, interval: str):
         logging.error(f"Error fetching historical data for {symbol}: {str(e)}")
         return None, str(e)
 
-def get_stocks(market: str = 'NASDAQ_100'):
+def get_stocks(market: str = 'NASDAQ'):
     """
     Fetches the list of stocks in a given market.
     """
-    if market != 'NASDAQ_100' and market != 'CAC40':
-        raise ValueError("Market must be either 'NASDAQ_100' or 'CAC40'")
+    if market not in ['NASDAQ', 'CAC40']:
+        raise ValueError("Market must be either 'NASDAQ' or 'CAC40'")
     
-    file_path = os.path.join('src', 'api', 'models', 'markets', f"{market}.csv")
-    df = pd.read_csv(file_path, sep=',')
-    df.rename(columns={'Name': 'name', 'Symbol': 'symbol'}, inplace=True)
-    stocks = df.to_dict('records')
-    return stocks
+    try:
+        return get_market_stocks(market)
+    except FileNotFoundError:
+        logging.error(f"Market data file not found for {market}")
+        return []
 
 def search_stocks(query: str):
     """
     Searches for stocks based on a query from a combined list of
     dynamically fetched NASDAQ and CAC40 stocks.
     """
-    nasdaq_stocks = get_stocks('NASDAQ_100')
+    nasdaq_stocks = get_stocks('NASDAQ')
     cac40_stocks = get_stocks('CAC40')
     stocks = nasdaq_stocks + cac40_stocks
     

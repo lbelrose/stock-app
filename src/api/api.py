@@ -9,9 +9,9 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
-def create_app():
+def create_api():
     """
-    Creates and configures the Flask application.
+    Creates and configures the Flask API.
     """
     app = Flask(__name__)
     CORS(app)
@@ -24,5 +24,5 @@ def create_app():
 
 # This block allows running the app directly for development
 if __name__ == '__main__':
-    app = create_app()
+    app = create_api()
     app.run(debug=True, port=5000)

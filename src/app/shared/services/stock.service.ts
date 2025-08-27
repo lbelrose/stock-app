@@ -41,12 +41,8 @@ export class StockService {
     );
   }
   
-  getDefaultStocks(): Observable<Stock[]> {
-    return this.searchStocks('');
-  }
-
-  getCac40Stocks(): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/cac40`).pipe(
+  getMarketStocks(market: string): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/market/${market}`).pipe(
       catchError(() => of([]))
     );
   }

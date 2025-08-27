@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from . import services
+from stocks import services
 
 stocks_bp = Blueprint('stocks', __name__, url_prefix='/api')
 
@@ -29,7 +29,7 @@ def search_stocks():
     results = services.search_stocks(query)
     return jsonify(results)
 
-@stocks_bp.route('/stocks/cac40', methods=['GET'])
-def get_cac40_stocks():
-    stocks = services.get_stocks('CAC40')
+@stocks_bp.route('/stocks/market/<market>', methods=['GET'])
+def get_stocks(market):
+    stocks = services.get_stocks(market)
     return jsonify(stocks)

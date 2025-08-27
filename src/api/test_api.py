@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from .app import create_app
+from .api import create_api
 import pandas as pd
 from datetime import datetime
 
 @pytest.fixture
 def app():
-    app = create_app()
+    app = create_api()
     app.config.update({
         "TESTING": True,
     })
