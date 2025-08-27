@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StockService } from '../../shared/services/stock.service';
+import { MarketService } from '../../shared/services/market.service';
 import { StockCardComponent } from '../../shared/components/stock-card/stock-card.component';
 import { StockDetail } from '../../shared/models/stock.model';
 import { catchError, forkJoin, map, of } from 'rxjs';
@@ -58,7 +59,7 @@ export class DashboardComponent implements OnInit {
   error = '';
   currentExchange: 'nasdaq' | 'cac40' = 'nasdaq';
   
-  constructor(private stockService: StockService) {}
+  constructor(private stockService: StockService, private marketService: MarketService) {}
   
   ngOnInit(): void {
     this.loadStocks();
@@ -73,7 +74,7 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    const stockList$ = this.stockService.getMarketStocks(this.currentExchange.toUpperCase());
+    const stockList$ = this.marketService.getStocks(this.currentExchange.toUpperCase());
 
     stockList$.pipe(
       map(stocks => stocks.slice(0, 9)),
