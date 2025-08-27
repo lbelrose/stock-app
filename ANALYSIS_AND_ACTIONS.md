@@ -92,6 +92,11 @@ Ceci démarrera à la fois:
 *   **Affichage des données historiques avec intervalles 1m, 5m et 15m** (Voir CHANGELOG #003)
 *   **Affichage des données historiques sur plusieurs périodes et intervalles** (Voir CHANGELOG #004)
 *   **Ajout des cotations du CAC40** (Voir CHANGELOG #007)
+*   **Refactorisation API, Marchés CSV et Intégration Modèle IA** (Voir CHANGELOG #014)
+    Refactorisation majeure du backend Flask (architecture modulaire, fichiers CSV locaux pour les marchés).
+    Intégration d'un modèle de prédiction IA (Random Forest) avec service et route API dédiés.
+    Mise à jour du frontend Angular pour utiliser les nouvelles routes et afficher les prédictions.
+    Mise à jour de la documentation et des configurations.
 
 ## 3. Actions Stratégiques
 
@@ -116,29 +121,11 @@ MIT
 
 ## 5. Intégration d'un module d'analyse par IA
 
-**Objectif:** Ajouter une fonctionnalité d'analyse et de prédiction à l'application, en s'inspirant de projets de finance quantitative existants.
+**Objectif:** Ajouter une fonctionnalité d'analyse et de prédiction à l'application.
 
 **Actions et Décisions:**
-
-1.  **Analyse du projet `Alphon`:**
-    - **Action:** Copie et analyse du projet `Alphon` dans `src/alphon_analysis`.
-    - **Constat:** Le projet est une suite de recherche complète et très complexe, utilisant des modèles avancés (GNNs, Transformers) et un pipeline de données lourd. Il est inadapté à une intégration directe pour des prédictions en temps réel.
-    - **Décision:** Ne pas intégrer `Alphon` directement, mais s'inspirer de sa logique de "featurization" (création d'indicateurs) pour construire un modèle plus simple.
-
-2.  **Création d'un modèle de prédiction local:**
-    - **Problème:** Le modèle simple (Random Forest) décrit dans le code d'`Alphon` n'était pas pr��sent dans les fichiers.
-    - **Action:** Création d'un script d'entraînement dédié: `src/api/analysis/train_model.py`.
-    - **Logique:** Le script télécharge l'historique d'une action (AAPL), calcule une série d'indicateurs techniques (SMA, EMA, RSI, MACD, etc.), et entraîne un modèle `RandomForestRegressor` de `scikit-learn` à prédire le rendement du jour suivant.
-    - **Résultat:** Le modèle entraîné est sauvegardé dans `src/api/analysis/models/random_forest_model.joblib`.
-
-3.  **Développement du Backend (Flask):**
-    - **Action:** Création d'un nouveau module `analysis` dans `src/api`.
-    - **Service:** `src/api/analysis/services.py` contient la `PredictionService` qui charge le modèle, récupère les dernières données pour un ticker, calcule les mêmes indicateurs, et retourne une prédiction.
-    - **Route:** `src/api/analysis/routes.py` expose le service via l'endpoint `GET /api/analysis/<ticker>`.
-    - **Intégration:** Le nouveau blueprint est enregistré dans `api.py`.
-
-4.  **Développement du Frontend (Angular):**
-    - **Action:** Mise à jour de `stock.model.ts` avec l'interface `StockPrediction`.
-    - **Service:** `stock.service.ts` est enrichi d'une méthode `getPrediction(ticker)` qui appelle la nouvelle API.
-    - **Composant:** `stock-detail.component.ts` appelle `getPrediction` et stocke le résultat.
-    - **UI:** Le template de `stock-detail` affiche une nouvelle carte "AI Prediction" avec le signal (`BUY`/`SELL`/`HOLD`) et un score de confiance.
+1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
+2.  **Création et Intégration d'un modèle de prédiction local:**
+    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestRegressor`.
+    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API.
+    - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
