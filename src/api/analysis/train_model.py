@@ -58,20 +58,20 @@ def train_model():
     Main function to train and save the Random Forest classifier.
     Predicts whether the next day's close is higher (1) or lower (0).
     """
-    print("🚀 Starting model training...")
+    print("Starting model training...")
 
     # 1. Data Acquisition
     ticker = "AAPL"
-    print(f"📊 Fetching data for {ticker}...")
+    print(f"Fetching data for {ticker}...")
     aapl_ticker = yf.Ticker(ticker)
     data = aapl_ticker.history(start="2015-01-01", end="2024-12-31")
 
     if data.empty:
-        print(f"❌ No data found for {ticker}. Exiting.")
+        print(f"No data found for {ticker}. Exiting.")
         return
 
     # 2. Feature Engineering
-    print("🔧 Generating technical indicators...")
+    print("Generating technical indicators...")
     features_df = generate_technical_indicators(data)
 
     # 3. Target: Binary (1 = price goes up tomorrow, 0 = down or flat)
@@ -80,7 +80,7 @@ def train_model():
     # 4. Data Cleaning
     features_df = features_df.dropna()
     if features_df.empty:
-        print("❌ Not enough data after feature generation.")
+        print("Not enough data after feature generation.")
         return
 
     # 5. Define Features and Target
