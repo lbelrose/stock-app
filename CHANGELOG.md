@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 015 - Correction des Imports et Refactorisation du Module Markets
+
+Correction des problèmes d'importation dans le backend Flask et refactorisation du module `markets`.
+Suppression de `sys.path.insert` dans `src/api/api.py` au profit de `pyproject.toml`.
+Renommage de `src/api/markets/models.py` en `src/api/markets/services.py`.
+Mise à jour des imports relatifs et suppression des fichiers de test obsolètes.
+
 ## 014 - Refactorisation API, Marchés CSV et Intégration Modèle IA
 
 Refactorisation majeure du backend Flask pour une architecture modulaire, utilisant des fichiers CSV locaux pour les listes d'actions. Intégration d'un modèle de prédiction par IA (Random Forest) avec un nouveau service et une route API dédiée. Le frontend Angular a été mis à jour pour s'adapter à ces changements.
