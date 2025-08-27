@@ -4,7 +4,6 @@ import yfinance as yf
 import joblib
 import os
 
-# --- Feature Generation (must match training) ---
 
 def generate_prediction_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -26,7 +25,7 @@ def generate_prediction_features(df: pd.DataFrame) -> pd.DataFrame:
     gain = delta.clip(lower=0).rolling(window=14).mean()
     loss = (-delta.clip(upper=0)).rolling(window=14).mean()
     rs = gain / loss.replace(0, 1e-10)
-    ti_df['rsi'] = 100 - (100 / (1 + rs))
+    ti_df['rsi'] = 100 - (100 / (1 + rs)))
 
     exp1 = ti_df[price_col].ewm(span=12, adjust=False).mean()
     exp2 = ti_df[price_col].ewm(span=26, adjust=False).mean()
@@ -43,73 +42,74 @@ def generate_prediction_features(df: pd.DataFrame) -> pd.DataFrame:
     return ti_df
 
 
-# --- Prediction Service ---
-
 class PredictionService:
     _model = None
     _features = None
 
     @classmethod
     def _load_model(cls):
-        """Lazy-load the trained classifier."""
+        """
+        Lazy-loads the trained model and feature list.
+        """
         if cls._model is None:
             model_path = os.path.join(os.path.dirname(__file__), 'models', 'random_forest_classifier.joblib')
             if not os.path.exists(model_path):
-                raise FileNotFoundError("Model file not found. Run 'train_model.py' first.")
+                raise FileNotFoundError("Model file not found. Run train_model.py first.")
 
             payload = joblib.load(model_path)
             cls._model = payload['model']
             cls._features = payload['features']
 
             if not isinstance(cls._model, RandomForestClassifier):
-                raise TypeError("Loaded model is not a classifier.")
+                raise TypeError("Loaded model is not a RandomForestClassifier.")
 
         return cls._model, cls._features
 
     @classmethod
     def get_prediction(cls, ticker: str) -> dict:
         """
-        Generate BUY/SELL/HOLD signal based on prediction.
-        Uses probability for confidence.
+        Generates a trading signal (BUY/SELL/HOLD) for the given ticker.
         """
         model, feature_names = cls._load_model()
 
-        # 1. Fetch data
-        print(f"📡 Fetching data for {ticker}...")
-        stock_data = yf.Ticker(ticker).history(period="200d")  # Enough for rolling windows
+        # Fetch data
+        stock_data = yf.Ticker(ticker).history(period="250d")
         if stock_data.empty:
-            raise ValueError(f"❌ No data for {ticker}")
+            raise ValueError(f"No data available for {ticker}.")
 
-        # 2. Generate features
-        features_df = generate_prediction_features(stock_data)
+        # Ensure chronological order
+        stock_data = stock_data.sort_index(ascending=True)
 
-        # 3. Prepare last row
-        last_row = features_df.iloc[[-1]][feature_names]  # Reorder to match training
+        # Generate features
+        raw_features = generate_prediction_features(stock_data)
 
+        # Lag features by one day
+        lagged_features = raw_features.shift(1)
+        last_row = lagged_features.iloc[[-1]][feature_names]
+
+        # Check for missing values
         if last_row.isnull().values.any():
-            raise ValueError(f"❌ Not enough data to compute indicators for {ticker}")
+            missing_cols = last_row.columns[last_row.isnull().any()].tolist()
+            raise ValueError(f"Missing values in features: {missing_cols}. Insufficient history.")
 
-        # 4. Predict probability
-        proba = model.predict_proba(last_row)[0]  # [p_down, p_up]
-        pred_class = model.predict(last_row)[0]
-
-        # Up probability is our main signal
+        # Predict probabilities
+        proba = model.predict_proba(last_row)[0]
         p_up = proba[1]
         p_down = proba[0]
 
-        # 5. Decision logic
-        threshold = 0.55  # Minimum edge to act
+        # Decision logic
+        threshold = 0.55
         if p_up > threshold:
             signal = "BUY"
-            confidence = (p_up - 0.5) / 0.5  # 0 to 1
+            confidence = min(0.99, (p_up - 0.5) / 0.5)
         elif p_down > threshold:
             signal = "SELL"
-            confidence = (p_down - 0.5) / 0.5
+            confidence = min(0.99, (p_down - 0.5) / 0.5)
         else:
             signal = "HOLD"
-            confidence = 1.0 - abs(p_up - 0.5) * 2  # Closer to 0.5 → lower confidence
+            confidence = max(0.0, 1.0 - abs(p_up - 0.5) * 2)
 
-        confidence = max(0.0, min(1.0, confidence))  # Clamp
+        confidence = max(0.0, min(1.0, confidence))
 
         return {
             "ticker": ticker,
