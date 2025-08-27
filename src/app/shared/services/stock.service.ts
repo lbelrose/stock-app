@@ -42,7 +42,7 @@ export class StockService {
   }
   
   getMarketStocks(market: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/stocks/market/${market}`).pipe(
+    return this.http.get<Stock[]>(`${this.apiUrl}/markets/${market}`).pipe(
       catchError(() => of([]))
     );
   }
