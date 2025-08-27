@@ -126,6 +126,8 @@ MIT
 **Actions et Décisions:**
 1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
 2.  **Création et Intégration d'un modèle de prédiction local:**
-    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestRegressor`.
+    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
     - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
+
+

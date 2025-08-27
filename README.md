@@ -45,6 +45,9 @@ This will start both:
 - Angular frontend at `http://localhost:4200`
 - Python API at `http://localhost:5000`
 
+
+## Tests
+
 Run Python tests:
 ```bash
 pytest src/api/
