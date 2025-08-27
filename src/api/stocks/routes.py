@@ -28,8 +28,3 @@ def search_stocks():
     query = request.args.get('q', '')
     results = services.search_stocks(query)
     return jsonify(results)
-
-@stocks_bp.route('/stocks/market/<market>', methods=['GET'])
-def get_stocks(market):
-    stocks = services.get_stocks(market)
-    return jsonify(stocks)
