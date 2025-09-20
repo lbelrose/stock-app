@@ -116,6 +116,12 @@ Ceci démarrera à la fois:
 
 **Résolution:** Conversion explicite des types numériques de NumPy en types Python standard dans les réponses JSON de l'API. Amélioration des mocks dans les tests pour simuler correctement les objets `pandas.DataFrame` et `datetime`.
 
+### Problème: ModuleNotFoundError lors de l'entraînement en arrière-plan
+
+**Description:** Le processus d'entraînement du modèle spécialisé en arrière-plan échouait avec une `ModuleNotFoundError: No module named 'src.api'`.
+
+**Résolution:** Le sous-processus `train_model.py` était exécuté avec un contexte de module incorrect. La correction a consisté à lancer le sous-processus depuis la racine du projet en spécifiant le paramètre `cwd` dans `subprocess.Popen`.
+
 ### Licence
 MIT
 
@@ -127,7 +133,7 @@ MIT
 1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
 2.  **Création et Intégration d'un modèle de prédiction local:**
     - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
-    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API.
+    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
 
 
