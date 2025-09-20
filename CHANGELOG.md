@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 016 - Améliorations et Débogage du Modèle de Prédiction IA
+
+- Correction du chemin du module d'entraînement en arrière-plan.
+- Capture des sorties d'entraînement pour le débogage.
+- Résolution de la fuite de données et réentraînement du modèle.
+
 ## 015 - Correction des Imports et Refactorisation du Module Markets
 
 Correction des problèmes d'importation dans le backend Flask et refactorisation du module `markets`.
