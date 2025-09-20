@@ -121,7 +121,7 @@ class PredictionService:
         python_executable = sys.executable # Use the same python interpreter
         command = [
             python_executable,
-            "-m", "src.api.analysis.train_model",
+            "src/api/analysis/train_model.py",
             "--ticker", ticker
         ]
         

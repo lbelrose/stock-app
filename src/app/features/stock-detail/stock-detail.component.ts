@@ -109,7 +109,11 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
           </div>
           <div class="bg-primary-50 border border-primary-200 p-4 rounded-lg">
             <p class="text-primary-700 text-sm mb-1 font-semibold">AI Prediction</p>
-            @if (prediction) {
+            @if (predictionMessage) {
+              <div class="text-primary-700 text-sm animate-pulse">
+                <p>{{ predictionMessage }}</p>
+              </div>
+            } @else if (prediction) {
               <div class="flex items-center gap-2">
                 <span [ngClass]="getPredictionClass()" class="badge text-base px-3 py-1">
                   {{ prediction.signal }}
@@ -132,6 +136,7 @@ export class StockDetailComponent implements OnInit, OnDestroy {
   symbol = '';
   stock: StockDetail | null = null;
   prediction: StockPrediction | null = null;
+  predictionMessage: string | null = null;
   loading = true;
   error = '';
   isInWatchlist = false;
@@ -168,13 +173,22 @@ export class StockDetailComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.prediction = null;
+    this.predictionMessage = null;
     
     this.stockService.getStockDetail(symbol).pipe(
       takeUntil(this.destroy$),
       tap(() => {
         this.stockService.getPrediction(symbol).pipe(
           takeUntil(this.destroy$)
-        ).subscribe(prediction => this.prediction = prediction);
+        ).subscribe(response => {
+          if (response.status && (response.status === 'training_started' || response.status === 'training_in_progress')) {
+            this.predictionMessage = response.message;
+            this.prediction = null;
+          } else {
+            this.prediction = response;
+            this.predictionMessage = null;
+          }
+        });
       })
     ).subscribe({
       next: (data) => {

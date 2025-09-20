@@ -1,0 +1,2 @@
+ticker,start_date,end_date,threshold,signals_count,win_rate,avg_return,profit_factor,cumulative_return,annualized_return,buy_and_hold_return,timestamp
+AIR.PA,2015-01-02,2024-12-30,0.55,775,0.5148387096774194,0.00024818518441749803,1.0374126589817578,0.059736306240985915,0.01904497906394398,2.7612776815004194,2025-09-20T17:50:20.544256

@@ -50,8 +50,8 @@ export class StockService {
     );
   }
 
-  getPrediction(symbol: string): Observable<StockPrediction> {
-    return this.http.get<StockPrediction>(`${this.apiUrl}/analysis/${symbol}`).pipe(
+  getPrediction(symbol: string): Observable<StockPrediction | any> {
+    return this.http.get<StockPrediction | any>(`${this.apiUrl}/analysis/${symbol}`).pipe(
       catchError(error => {
         console.error(`Error fetching prediction for ${symbol}:`, error);
         // Return a default "error" prediction object
