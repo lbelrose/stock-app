@@ -3,120 +3,177 @@ import numpy as np
 import yfinance as yf
 import joblib
 import os
+from sklearn.ensemble import RandomForestClassifier
 
 
 def generate_prediction_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Generates the same technical indicators used during training.
+    Generates only the 12 features used in the simplified buy signal model.
+    Ensures consistency with training.
     """
-    price_col = 'Close'
-    volume_col = 'Volume'
     ti_df = df.copy()
+    close = ti_df['Close']
+    volume = ti_df['Volume']
 
-    for col in [price_col, volume_col]:
-        ti_df[col] = pd.to_numeric(ti_df[col], errors='coerce')
+    # 1. Returns
+    ti_df['return_1d'] = close.pct_change(1)
+    ti_df['return_5d'] = close.pct_change(5)
 
-    ti_df['sma_10'] = ti_df[price_col].rolling(window=10).mean()
-    ti_df['sma_50'] = ti_df[price_col].rolling(window=50).mean()
-    ti_df['ema_10'] = ti_df[price_col].ewm(span=10, adjust=False).mean()
-    ti_df['ema_20'] = ti_df[price_col].ewm(span=20, adjust=False).mean()
+    # Lagged returns (will be shifted again later)
+    for lag in [1, 2, 3]:
+        ti_df[f'return_lag_{lag}'] = ti_df['return_1d'].shift(lag)
 
-    delta = ti_df[price_col].diff()
-    gain = delta.clip(lower=0).rolling(window=14).mean()
-    loss = (-delta.clip(upper=0)).rolling(window=14).mean()
+    # 2. Volume
+    ti_df['volume_sma_20'] = volume.rolling(20).mean()
+    ti_df['volume_ratio'] = volume / ti_df['volume_sma_20'].replace(0, 1e-10)
+    ti_df['volume_lag_1'] = volume.shift(1)
+    ti_df['volume_lag_2'] = volume.shift(2)
+    ti_df['volume_ratio_lag_1'] = ti_df['volume_lag_1'] / ti_df['volume_sma_20'].replace(0, 1e-10)
+    ti_df['volume_ratio_lag_2'] = ti_df['volume_lag_2'] / ti_df['volume_sma_20'].replace(0, 1e-10)
+
+    # 3. Trend
+    ti_df['sma_10'] = close.rolling(10).mean()
+    ti_df['close_sma10_ratio'] = close / ti_df['sma_10'].replace(0, 1e-10)
+
+    # 4. Volatility
+    ti_df['volatility_20'] = ti_df['return_1d'].rolling(20).std()
+
+    # 5. RSI
+    delta = close.diff()
+    gain = delta.clip(lower=0).rolling(14).mean()
+    loss = (-delta.clip(upper=0)).rolling(14).mean()
     rs = gain / loss.replace(0, 1e-10)
-    ti_df['rsi'] = 100 - (100 / (1 + rs)))
-
-    exp1 = ti_df[price_col].ewm(span=12, adjust=False).mean()
-    exp2 = ti_df[price_col].ewm(span=26, adjust=False).mean()
-    ti_df['macd'] = exp1 - exp2
-    ti_df['macd_signal'] = ti_df['macd'].ewm(span=9, adjust=False).mean()
-
-    ti_df['bollinger_mid'] = ti_df[price_col].rolling(window=20).mean()
-    ti_df['bollinger_std'] = ti_df[price_col].rolling(window=20).std()
-    ti_df['bollinger_upper'] = ti_df['bollinger_mid'] + (ti_df['bollinger_std'] * 2)
-    ti_df['bollinger_lower'] = ti_df['bollinger_mid'] - (ti_df['bollinger_std'] * 2)
-
-    ti_df['volatility_20d'] = ti_df[price_col].pct_change().rolling(window=20).std()
+    ti_df['rsi'] = 100 - (100 / (1 + rs))
+    ti_df['rsi_lag_1'] = ti_df['rsi'].shift(1)
 
     return ti_df
 
 
+import subprocess
+import sys
+
 class PredictionService:
-    _model = None
-    _features = None
+    _models = {}  # Cache for loaded models
+    _training_processes = {} # Track running training processes
 
     @classmethod
-    def _load_model(cls):
-        """
-        Lazy-loads the trained model and feature list.
-        """
-        if cls._model is None:
-            model_path = os.path.join(os.path.dirname(__file__), 'models', 'random_forest_classifier.joblib')
-            if not os.path.exists(model_path):
-                raise FileNotFoundError("Model file not found. Run train_model.py first.")
+    def _get_model_path(cls, ticker: str) -> (str, str):
+        """Returns the paths for the specialist and general models."""
+        normalized_ticker = ticker.lower().replace('.pa', '')
+        model_dir = os.path.join(os.path.dirname(__file__), 'models')
+        specialist_name = f"buy_signal_classifier_{normalized_ticker}.joblib"
+        general_name = "buy_signal_classifier_general.joblib"
+        return os.path.join(model_dir, specialist_name), os.path.join(model_dir, general_name)
 
+    @classmethod
+    def _load_model(cls, model_path: str):
+        """Loads a model from a given path and caches it."""
+        model_name = os.path.basename(model_path)
+        if model_name in cls._models:
+            payload = cls._models[model_name]
+        else:
+            print(f"Loading model from disk: {model_name}")
             payload = joblib.load(model_path)
-            cls._model = payload['model']
-            cls._features = payload['features']
-
-            if not isinstance(cls._model, RandomForestClassifier):
-                raise TypeError("Loaded model is not a RandomForestClassifier.")
-
-        return cls._model, cls._features
+            cls._models[model_name] = payload
+        
+        return payload['model'], payload['features']
 
     @classmethod
     def get_prediction(cls, ticker: str) -> dict:
         """
-        Generates a trading signal (BUY/SELL/HOLD) for the given ticker.
+        Handles the logic of retrieving a prediction.
+        - If a specialist model exists, use it.
+        - If not, trigger a background training process and notify the user.
+        - If a training process is already running, notify the user.
+        - If training fails (model still doesn't exist on next request), use the general model as a fallback.
         """
-        model, feature_names = cls._load_model()
+        specialist_path, general_path = cls._get_model_path(ticker)
 
-        # Fetch data
+        if os.path.exists(specialist_path):
+            model, features = cls._load_model(specialist_path)
+            return cls._generate_prediction_for_model(ticker, model, features)
+
+        # Check if training is already in progress
+        if ticker in cls._training_processes:
+            proc = cls._training_processes[ticker]
+            if proc.poll() is None: # Process is still running
+                return {
+                    "status": "training_in_progress",
+                    "message": f"A specialist model for {ticker} is still being generated. Please try again in a moment."
+                }
+            else: # Process finished
+                del cls._training_processes[ticker]
+                # Re-check if the model was created successfully
+                if os.path.exists(specialist_path):
+                    model, features = cls._load_model(specialist_path)
+                    return cls._generate_prediction_for_model(ticker, model, features)
+                else: # Training finished but failed to create a model
+                    stdout, stderr = proc.communicate()
+                    print(f"Training for {ticker} finished but no model was created. STDOUT: {stdout.decode().strip()}, STDERR: {stderr.decode().strip()}. Falling back to general model.")
+                    if os.path.exists(general_path):
+                        model, features = cls._load_model(general_path)
+                        return cls._generate_prediction_for_model(ticker, model, features, model_type="general (fallback)")
+                    else:
+                         raise FileNotFoundError("Specialist model training failed and the general fallback model is also missing.")
+
+        # If no model and no training in progress, start training
+        print(f"Specialist model for {ticker} not found. Starting background training.")
+        python_executable = sys.executable # Use the same python interpreter
+        command = [
+            python_executable,
+            "-m", "src.api.analysis.train_model",
+            "--ticker", ticker
+        ]
+        
+        # Start the process in the background
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cls._training_processes[ticker] = proc
+
+        return {
+            "status": "training_started",
+            "message": f"A specialist model for {ticker} is being generated. Please try again in a few minutes."
+        }
+
+    @classmethod
+    def _generate_prediction_for_model(cls, ticker: str, model, feature_names: list, model_type="specialist") -> dict:
+        """
+        The core prediction logic, separated to be reusable.
+        """
         stock_data = yf.Ticker(ticker).history(period="250d")
         if stock_data.empty:
             raise ValueError(f"No data available for {ticker}.")
 
-        # Ensure chronological order
         stock_data = stock_data.sort_index(ascending=True)
-
-        # Generate features
         raw_features = generate_prediction_features(stock_data)
-
-        # Lag features by one day
         lagged_features = raw_features.shift(1)
         last_row = lagged_features.iloc[[-1]][feature_names]
 
-        # Check for missing values
         if last_row.isnull().values.any():
             missing_cols = last_row.columns[last_row.isnull().any()].tolist()
-            raise ValueError(f"Missing values in features: {missing_cols}. Insufficient history.")
+            raise ValueError(f"Missing values in features: {missing_cols}. Not enough history.")
 
-        # Predict probabilities
         proba = model.predict_proba(last_row)[0]
-        p_up = proba[1]
-        p_down = proba[0]
+        p_up, p_down = proba[1], proba[0]
 
-        # Decision logic
-        threshold = 0.55
-        if p_up > threshold:
+        buy_threshold = 0.55  # Adjusted for potentially more 'average' models
+        sell_threshold = 0.65
+
+        if p_up > buy_threshold:
             signal = "BUY"
             confidence = min(0.99, (p_up - 0.5) / 0.5)
-        elif p_down > threshold:
+        elif p_down > sell_threshold:
             signal = "SELL"
             confidence = min(0.99, (p_down - 0.5) / 0.5)
         else:
             signal = "HOLD"
-            confidence = max(0.0, 1.0 - abs(p_up - 0.5) * 2)
-
-        confidence = max(0.0, min(1.0, confidence))
+            confidence = 1.0 - abs(p_up - 0.5) * 2
 
         return {
             "ticker": ticker,
             "signal": signal,
-            "confidence": f"{confidence:.2f}",
+            "confidence": f"{max(0.0, min(1.0, confidence)):.2f}",
             "probability_up": f"{p_up:.4f}",
             "probability_down": f"{p_down:.4f}",
-            "model_status": "active",
+            "model_type": model_type,
             "timestamp": pd.Timestamp.now(tz='UTC').isoformat()
         }
