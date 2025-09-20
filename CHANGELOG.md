@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 017 - Intégration et Refactorisation des Modèles de Prédiction IA
+
+- Intégration des nouveaux modèles de prédiction spécialisés et généralisés.
+- Refactorisation du script d'entraînement pour générer des modèles par ticker.
+- Mise à jour du frontend pour afficher les messages d'état d'entraînement.
+- Suppression de l'ancien modèle `random_forest_classifier.joblib`.
+- Ajout des scripts de backtesting et des résultats.
+
 ## 016 - Améliorations et Débogage du Modèle de Prédiction IA
 
 - Correction du chemin du module d'entraînement en arrière-plan.
