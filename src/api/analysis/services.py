@@ -126,7 +126,8 @@ class PredictionService:
         ]
         
         # Start the process in the background
-        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project_root)
         cls._training_processes[ticker] = proc
 
         return {
