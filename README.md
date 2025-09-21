@@ -1,20 +1,15 @@
 # TradeMind
 
-A real-time stock tracking application for the Nasdaq and CAC40 Stock Exchanges, with a focus on AI-driven analysis and alerts. This application uses Angular 19, Python, and yfinance.
+A real-time stock tracking application for the Nasdaq and CAC40 Stock Exchanges, featuring AI-driven trend analysis. This application is built with Angular 21, Python Flask, and yfinance.
 
-## Features
+## Key Features
 
-- Real-time stock quotes from Nasdaq and CAC40
-- Interactive stock charts with multiple timeframes
-- Stock search functionality
-- Watchlist management
-- Technical indicators (RSI, MACD)
-- Responsive design for all devices
-
-## Future Features
-
-- AI-powered analysis of stock data
-- Real-time buy/sell opportunity alerts
+- **Market Data:** Real-time stock quotes from both Nasdaq and CAC40 exchanges.
+- **AI-Powered Analysis:** Predicts stock trends (up/down) using a Machine Learning model trained on technical indicators.
+- **Interactive Charts:** Visualize historical data across multiple timeframes (1D, 7D, 1M, 1Y) and intervals (1m, 5m, 15m, 30m, 1h).
+- **Watchlist Management:** Keep track of your favorite stocks.
+- **Stock Search:** Easily find any stock from the available markets.
+- **Responsive Design:** Fully functional on both desktop and mobile devices.
 
 ## Prerequisites
 
@@ -24,69 +19,71 @@ A real-time stock tracking application for the Nasdaq and CAC40 Stock Exchanges,
 
 ## Installation
 
-1. Install Node.js dependencies:
-```bash
-npm install
-```
+1.  Install Node.js dependencies:
+    ```bash
+    npm install
+    ```
 
-2. Install Python dependencies:
-```bash
-pip install -r src/api/requirements.txt
-```
+2.  Install Python dependencies:
+    ```bash
+    pip install -r src/api/requirements.txt
+    ```
 
 ## Development
 
-Run the development server:
+Run the development server for both frontend and backend:
 ```bash
 npm run dev
 ```
-
-This will start both:
+This will start:
 - Angular frontend at `http://localhost:4200`
 - Python API at `http://localhost:5000`
 
-
 ## Tests
 
-Run Python tests:
+Run the Python backend tests:
 ```bash
 pytest src/api/
 ```
 
 ## Project Structure
-
 ```
-├── pyproject.toml              # Project configuration for tools like pytest
-├── src/                        # Angular frontend
-│   ├── api/                    # Python backend
-│   │   ├── stocks/             # Stocks feature module
-│   │   │   ├── routes.py       # Blueprint for stock routes
-│   │   │   ├── services.py     # Business logic for stocks
-│   │   │   └── tests/          # Tests for the stocks module
-│   │   ├── analysis/           # Analysis feature module (AI predictions)
-│   │   │   ├── routes.py       # Blueprint for analysis routes
-│   │   │   ├── services.py     # Business logic for analysis
-│   │   │   ├── train_model.py  # Script to train the AI model
-│   │   │   └── models/         # Trained AI models
+├── src/
+│   ├── api/                    # Python backend (Flask)
+│   │   ├── analysis/           # Analysis & Prediction module
+│   │   │   ├── models/         # Trained AI models (.joblib)
+│   │   │   ├── routes.py       # API routes for analysis
+│   │   │   ├── services.py     # Business logic for predictions
+│   │   │   └── train_model.py  # Model training script
 │   │   ├── markets/            # Market data module
-│   │   │   ├── __init__.py
-│   │   │   ├── services.py     # Logic to load market data from CSVs
-│   │   │   └── models/         # CSV files for markets (e.g., NASDAQ.csv, CAC40.csv)
+│   │   │   ├── models/         # Market data files (CSV)
+│   │   │   ├── routes.py       # API routes for market lists
+│   │   │   └── services.py     # Logic for reading market data
+│   │   ├── stocks/             # Stock data module
+│   │   │   ├── routes.py       # API routes for stock data
+│   │   │   ├── services.py     # Logic for fetching stock data
+│   │   │   └── tests/          # Unit tests for stock services
 │   │   ├── api.py              # Flask application factory
 │   │   └── requirements.txt    # Python dependencies
-│   ├── app/                    # Application components
+│   ├── app/                    # Angular frontend
 │   │   ├── features/           # Feature modules
-│   │   └── shared/             # Shared components
-│   └── assets/                 # Static assets
-└── package.json                # Node.js dependencies
+│   │   │   ├── dashboard/      # Dashboard component
+│   │   │   └── stock-detail/   # Stock detail component
+│   │   └── shared/             # Shared components, services, models
+│   │       ├── components/     # Reusable UI components
+│   │       ├── models/         # TypeScript models
+│   │       └── services/       # Angular services
+│   └── ...
+└── package.json
 ```
 
 ## Technologies
 
-- Angular 19
+- Angular 21
 - TailwindCSS
 - Python Flask
 - yfinance
+- Scikit-learn
 - Chart.js
 
 ## License

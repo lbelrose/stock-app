@@ -6,17 +6,17 @@
 L'application est un traqueur d'actions en temps réel pour le Nasdaq Stock Exchange.
 
 ### Architecture Générale
-L'application est une architecture client-serveur:
-*   **Frontend:** Application web Angular (v19.2.0) avec Tailwind CSS pour le stylisme. Utilise `chart.js` et `ng2-charts` pour les graphiques.
-*   **Backend:** API REST Flask (v3.0.3) en Python. Utilise `yfinance` pour récupérer les données boursières et `flask-cors` pour gérer les requêtes cross-origin. Le `README.md` mentionne l'utilisation de "TradingView API", mais l'implémentation actuelle utilise `yfinance`.
+L'application est une architecture client-serveur :
+*   **Frontend :** Application web Angular (v21) utilisant Tailwind CSS. L'état est géré par les signaux Angular et les graphiques sont rendus avec `chart.js` et `ng2-charts`. L'architecture est modulaire, organisée en `features` (Dashboard, Stock-Detail) et `shared` (services, modèles, composants réutilisables).
+*   **Backend :** API REST développée avec Flask (v3.0.3) en Python. Elle est structurée en modules (Blueprints) pour chaque domaine fonctionnel (stocks, markets, analysis). Elle utilise `yfinance` pour la récupération des données boursières et `scikit-learn` pour les modèles de prédiction.
 
 ### Fonctionnalités Clés
-*   Cotations boursières en temps réel du Nasdaq.
-*   Graphiques boursiers interactifs avec plusieurs échelles de temps.
-*   Fonctionnalité de recherche d'actions.
-*   Gestion de la liste de surveillance (watchlist).
-*   Indicateurs techniques (RSI, MACD).
-*   Conception réactive pour tous les appareils.
+*   **Cotations boursières :** Affichage des données pour le CAC40 et le Nasdaq.
+*   **Graphiques interactifs :** Visualisation des données historiques sur plusieurs périodes (1j, 7j, 1m, 1a) et intervalles (1m, 5m, 15m, 30m, 1h).
+*   **Analyse par IA :** Prédiction de la tendance (hausse/baisse) basée sur un modèle de Machine Learning entraîné sur des indicateurs techniques.
+*   **Gestion de watchlist :** Permet aux utilisateurs de suivre leurs actions préférées.
+*   **Recherche d'actions :** Fonctionnalité de recherche simple.
+*   **Responsive Design :** Interface adaptable à tous les appareils.
 
 ### Communication
 Le frontend Angular communique avec le backend Flask via des requêtes HTTP REST. `concurrently` est utilisé en développement pour lancer les deux serveurs simultanément.
@@ -27,7 +27,7 @@ Le frontend Angular communique avec le backend Flask via des requêtes HTTP REST
 *   Intégration de `yfinance` pour les données boursières et calcul d'indicateurs techniques.
 
 ### Technologies Utilisées
-*   Angular 19
+*   Angular 21
 *   TailwindCSS
 *   Python Flask
 *   TradingView Technical Analysis Library (mentionné dans README, mais `yfinance` est utilisé dans le code)
@@ -60,22 +60,33 @@ Ceci démarrera à la fois:
 
 ### Structure du Projet
 ```
-├── src/                        # Angular frontend
-│   ├── api/                    # Python backend
-│   │   ├── stocks/             # Stocks feature module
-│   │   │   ├── routes.py       # Blueprint for stock routes
-│   │   │   ├── services.py     # Business logic for stocks
-│   │   │   └── tests/          # Tests for the stocks module
-│   │   ├── models/             # Data models and static files
-│   │   │   └── markets/        # CSV files for markets
+├── src/
+│   ├── api/                    # Python backend (Flask)
+│   │   ├── analysis/           # Analysis & Prediction module
+│   │   │   ├─��� models/         # Trained AI models (.joblib)
+│   │   │   ├── routes.py       # API routes for analysis
+│   │   │   ├── services.py     # Business logic for predictions
+│   │   │   └── train_model.py  # Model training script
+│   │   ├── markets/            # Market data module
+│   │   │   ├── models/         # Market data files (CSV)
+│   │   │   ├── routes.py       # API routes for market lists
+│   │   │   └── services.py     # Logic for reading market data
+│   │   ├── stocks/             # Stock data module
+│   │   │   ├── routes.py       # API routes for stock data
+│   │   │   ├── services.py     # Logic for fetching stock data
+│   │   │   └── tests/          # Unit tests for stock services
 │   │   ├── api.py              # Flask application factory
-│   │   ├── test_api.py         # Integration tests
 │   │   └── requirements.txt    # Python dependencies
-│   ├── app/                    # Application components
+│   ├── app/                    # Angular frontend
 │   │   ├── features/           # Feature modules
-│   │   └── shared/             # Shared components
-│   └── assets/                 # Static assets
-└── package.json                # Node.js dependencies
+│   │   │   ├── dashboard/      # Dashboard component
+│   │   │   └── stock-detail/   # Stock detail component
+│   │   └── shared/             # Shared components, services, models
+│   │       ├── components/     # Reusable UI components
+│   │       ├── models/         # TypeScript models
+│   │       └── services/       # Angular services
+│   └── ...
+└── package.json
 ```
 
 ### Axes d'Amélioration (pour la production)
@@ -86,21 +97,18 @@ Ceci démarrera à la fois:
 *   Considérer le déploiement (WSGI, Docker, etc.).
 *   Ajouter des tests unitaires et d'intégration.
 
-## 2. Nouvelles Fonctionnalités
+## 2. Évolutions et Fonctionnalités
 
-*   **Affichage des données historiques par intervalle de 15 minutes** (Voir CHANGELOG #001)
-*   **Affichage des données historiques avec intervalles 1m, 5m et 15m** (Voir CHANGELOG #003)
-*   **Affichage des données historiques sur plusieurs périodes et intervalles** (Voir CHANGELOG #004)
-*   **Ajout des cotations du CAC40** (Voir CHANGELOG #007)
-*   **Refactorisation API, Marchés CSV et Intégration Modèle IA** (Voir CHANGELOG #014)
-    Refactorisation majeure du backend Flask (architecture modulaire, fichiers CSV locaux pour les marchés).
-    Intégration d'un modèle de prédiction IA (Random Forest) avec service et route API dédiés.
-    Mise à jour du frontend Angular pour utiliser les nouvelles routes et afficher les prédictions.
-    Mise à jour de la documentation et des configurations.
+*   **Visualisation des Données :** Mise en place de l'affichage des données historiques sur plusieurs périodes et intervalles pour une analyse détaillée (CHANGELOG #001, #003, #004).
+*   **Extension des Marchés :** Ajout des cotations de l'indice CAC40 en plus du Nasdaq (CHANGELOG #007).
+*   **Intégration de l'IA :** Développement d'un module de prédiction (Random Forest) pour anticiper les tendances du marché. Le backend a été doté d'un service et d'une route API dédiée, et le frontend mis à jour pour afficher ces prédictions (CHANGELOG #014).
+*   **Refactorisation Backend :** L'API Flask a été restructurée pour être plus modulaire (Blueprints) et utilise désormais des fichiers CSV locaux pour une meilleure fiabilité des listes d'actions (CHANGELOG #014).
+*   **Mise à Jour Frontend :** L'application a été migrée vers Angular 21. Les composants principaux ont été refactorisés avec des fichiers dédiés et l'état est maintenant géré par les signaux Angular pour une meilleure performance (CHANGELOG #019).
+*   **Amélioration UX :** Le marché par défaut est maintenant le CAC40 pour une expérience plus pertinente pour les utilisateurs français.
 
 ## 3. Actions Stratégiques
 
-*   **Renommage de l'application en "TradeMind"** (Voir CHANGELOG #008)
+*   **Renommage de l'application :** L'application a été renommée "TradeMind" pour mieux refléter son orientation vers l'analyse intelligente des données boursières (CHANGELOG #008).
 
 ## 4. Intégration d'un module d'analyse par IA
 
@@ -112,6 +120,7 @@ Ceci démarrera à la fois:
     - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
     - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
+3.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
 
 ## 5. Résolution des Problèmes
 
