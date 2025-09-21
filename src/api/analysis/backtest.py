@@ -6,7 +6,7 @@ import joblib
 import os
 from datetime import datetime
 import argparse
-
+from .features import generate_technical_features
 
 def load_model_and_features(model_name="buy_signal_classifier_general.joblib"):
     """
@@ -18,49 +18,6 @@ def load_model_and_features(model_name="buy_signal_classifier_general.joblib"):
 
     payload = joblib.load(model_path)
     return payload['model'], payload['features']
-
-
-def generate_features_for_backtest(df):
-    """
-    Generates the same 12 features as in training and services.
-    """
-    close = df['Close']
-    volume = df['Volume']
-
-    # Initialize DataFrame
-    feats = pd.DataFrame(index=df.index)
-
-    # 1. Returns
-    feats['return_1d'] = close.pct_change(1)
-    feats['return_5d'] = close.pct_change(5)
-
-    for lag in [1, 2, 3]:
-        feats[f'return_lag_{lag}'] = feats['return_1d'].shift(lag)
-
-    # 2. Volume
-    feats['volume_sma_20'] = volume.rolling(20).mean()
-    feats['volume_ratio'] = volume / feats['volume_sma_20'].replace(0, 1e-10)
-    feats['volume_lag_1'] = volume.shift(1)
-    feats['volume_lag_2'] = volume.shift(2)
-    feats['volume_ratio_lag_1'] = feats['volume_lag_1'] / feats['volume_sma_20'].replace(0, 1e-10)
-    feats['volume_ratio_lag_2'] = feats['volume_lag_2'] / feats['volume_sma_20'].replace(0, 1e-10)
-
-    # 3. Trend
-    sma_10 = close.rolling(10).mean()
-    feats['close_sma10_ratio'] = close / sma_10.replace(0, 1e-10)
-
-    # 4. Volatility
-    feats['volatility_20'] = feats['return_1d'].rolling(20).std()
-
-    # 5. RSI
-    delta = close.diff()
-    gain = delta.clip(lower=0).rolling(14).mean()
-    loss = (-delta.clip(upper=0)).rolling(14).mean()
-    rs = gain / loss.replace(0, 1e-10)
-    rsi = 100 - (100 / (1 + rs))
-    feats['rsi_lag_1'] = rsi.shift(1)
-
-    return feats
 
 
 def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", buy_threshold=0.55, model_name="buy_signal_classifier_general.joblib"):
@@ -79,7 +36,7 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
 
     # 2. Generate features
     print("Generating features...")
-    feature_df = generate_features_for_backtest(data)
+    feature_df = generate_technical_features(data)
 
     # 3. Load model
     model, feature_names = load_model_and_features(model_name)
