@@ -103,7 +103,7 @@ class PredictionService:
             raise ValueError(f"No data available for {ticker}.")
 
         stock_data = stock_data.sort_index(ascending=True)
-        raw_features = generate_prediction_features(stock_data)
+        raw_features = generate_technical_features(stock_data)
         lagged_features = raw_features.shift(1)
         last_row = lagged_features.iloc[[-1]][feature_names]
 

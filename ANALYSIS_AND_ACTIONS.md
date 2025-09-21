@@ -118,7 +118,7 @@ Ceci démarrera à la fois:
 1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
 2.  **Création et Intégration d'un modèle de prédiction local:**
     - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
-    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure.
+    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure. Le script `predict_next_day.py` utilise désormais les seuils d'achat optimisés par ticker, chargés depuis `optimized_thresholds.json`.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
 3.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
 

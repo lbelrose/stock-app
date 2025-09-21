@@ -2,22 +2,35 @@ import pandas as pd
 import yfinance as yf
 import joblib
 import os
+import json
 from datetime import datetime, timedelta
 from .services import PredictionService
 from .features import generate_technical_features
 
-def predict_next_day_movement(ticker, model_name="buy_signal_classifier_general.joblib", buy_threshold=0.55):
+# Charger les seuils optimisés
+OPTIMIZED_THRESHOLDS_PATH = os.path.join(os.path.dirname(__file__), 'optimized_thresholds.json')
+try:
+    with open(OPTIMIZED_THRESHOLDS_PATH, 'r') as f:
+        OPTIMIZED_THRESHOLDS = json.load(f)
+except FileNotFoundError:
+    print(f"Attention: Le fichier de seuils optimisés n'a pas été trouvé à {OPTIMIZED_THRESHOLDS_PATH}. Utilisation des valeurs par défaut.")
+    OPTIMIZED_THRESHOLDS = {}
+
+def predict_next_day_movement(ticker):
     """
     Predicts the probability of an upward movement for the next trading day.
     This function now leverages the centralized prediction logic in PredictionService.
     """
-    print(f"Prédiction pour {ticker} avec le modèle {model_name}...")
+    # Récupérer le seuil optimisé et le nom du modèle pour le ticker, ou utiliser des valeurs par défaut
+    ticker_info = OPTIMIZED_THRESHOLDS.get(ticker.upper(), {})
+    model_name = ticker_info.get('model_name', "buy_signal_classifier_general.joblib")
+    buy_threshold = ticker_info.get('optimal_buy_threshold', 0.55) # Seuil par défaut si non trouvé
 
-    # We need to load the model and features to pass them to _generate_prediction_for_model
-    # This part is still necessary as predict_next_day_movement can be called independently
+    print(f"Prédiction pour {ticker} avec le modèle {model_name} et le seuil d'achat {buy_threshold:.2f}...")
+
     model_path = os.path.join(os.path.dirname(__file__), 'models', model_name)
     if not os.path.exists(model_path):
-        print(f"Model not found at {model_path}. Cannot make prediction.")
+        print(f"Modèle non trouvé à {model_path}. Impossible de faire la prédiction.")
         return None, None
     
     payload = joblib.load(model_path)
@@ -50,10 +63,9 @@ def predict_next_day_movement(ticker, model_name="buy_signal_classifier_general.
 if __name__ == "__main__":
     # Exemple d'utilisation pour AMZN
     ticker_to_predict = "AMZN"
-    model_file = "buy_signal_classifier_amzn.joblib"
     
     print(f"--- Prédiction pour le prochain jour de bourse de {ticker_to_predict} ---")
-    prob, signal = predict_next_day_movement(ticker_to_predict, model_file)
+    prob, signal = predict_next_day_movement(ticker_to_predict)
     
     print("\n" + "="*50)
     print(f"Résultat final pour {ticker_to_predict}:")

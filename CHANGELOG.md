@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 020 - Intégration des Seuils Optimisés de Prédiction
+
+- Intégration des seuils d'achat optimisés par ticker dans le script de prédiction.
+- Le script `predict_next_day.py` utilise désormais les seuils et modèles spécifiques à chaque action, chargés depuis `optimized_thresholds.json`.
+- Correction d'une `NameError` dans `services.py` en remplaçant `generate_prediction_features` par `generate_technical_features`.
+
 ## 019 - Refactorisation Frontend et Mise à Jour Angular 21
 
 - Refactorisation des composants Dashboard et Header.
@@ -67,7 +73,7 @@
 - Routes définies dans des Blueprints.
 - Ajout de tests unitaires pour la couche de service.
 
-## 009 - Déplacement du dossier API
+## 009 - D��placement du dossier API
 
 - Déplacement du dossier `api` dans `src/`.
 - Meilleure organisation du projet.
