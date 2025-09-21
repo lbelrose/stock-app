@@ -5,6 +5,7 @@ from sklearn.model_selection import TimeSeriesSplit
 import joblib
 import os
 from datetime import datetime
+import argparse
 
 
 def load_model_and_features(model_name="buy_signal_classifier_general.joblib"):
@@ -176,7 +177,15 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
 
 
 if __name__ == "__main__":
-    # Backtest the specialized Airbus model on AIR.PA
-    print("--- Backtesting Specialized Model on AIR.PA ---")
-    run_backtest(ticker="AIR.PA", buy_threshold=0.52, model_name="buy_signal_classifier_airbus.joblib")
+    parser = argparse.ArgumentParser(description="Run backtest for a given stock and model.")
+    parser.add_argument("--ticker", type=str, default="AAPL", help="Stock ticker symbol (e.g., AAPL, AIR.PA)")
+    parser.add_argument("--start_date", type=str, default="2015-01-02", help="Start date for backtest (YYYY-MM-DD)")
+    parser.add_argument("--end_date", type=str, default="2024-12-30", help="End date for backtest (YYYY-MM-DD)")
+    parser.add_argument("--buy_threshold", type=float, default=0.55, help="Probability threshold for generating a BUY signal")
+    parser.add_argument("--model_name", type=str, default="buy_signal_classifier_general.joblib", help="Name of the model file to use (e.g., buy_signal_classifier_general.joblib)")
+
+    args = parser.parse_args()
+
+    print(f"--- Backtesting with model {args.model_name} on {args.ticker} ---")
+    run_backtest(ticker=args.ticker, start_date=args.start_date, end_date=args.end_date, buy_threshold=args.buy_threshold, model_name=args.model_name)
 
