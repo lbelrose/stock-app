@@ -1,2 +1,0 @@
-ticker,start_date,end_date,threshold,signals_count,win_rate,avg_return,profit_factor,cumulative_return,annualized_return,buy_and_hold_return,timestamp
-TSLA,2015-01-02,2024-12-30,0.605,9,0.7777777777777778,0.004767013790759932,1.2998833855895524,0.03456018148985662,1.5891741076300545,27.673521714150525,2025-08-27T20:29:25.928124

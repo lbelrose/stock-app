@@ -1,2 +1,0 @@
-ticker,start_date,end_date,threshold,signals_count,win_rate,avg_return,profit_factor,cumulative_return,annualized_return,buy_and_hold_return,timestamp
-AAPL,2015-01-02,2024-12-30,0.605,31,0.967741935483871,0.008766047102412914,11.20598053858748,0.3087122960772797,7.909024058029665,8.544828769264347,2025-08-27T20:30:31.127451
