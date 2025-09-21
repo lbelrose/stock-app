@@ -11,8 +11,8 @@ export class MarketService {
 
   constructor(private http: HttpClient) { }
 
-  getStocks(market: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/markets/${market}`).pipe(
+  getStocks(market: string, page: number = 1, limit: number = 20): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.apiUrl}/markets/${market}?page=${page}&limit=${limit}`).pipe(
       catchError(() => of([]))
     );
   }

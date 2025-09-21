@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StockService } from '../../shared/services/stock.service';
 import { MarketService } from '../../shared/services/market.service';
@@ -29,7 +29,7 @@ import { catchError, forkJoin, map, of } from 'rxjs';
       </button>
     </div>
     
-    @if (loading) {
+    @if (loading && stocks.length === 0) {
       <div class="flex justify-center items-center py-12">
         <div class="animate-pulse flex flex-col items-center">
           <div class="h-12 w-12 rounded-full bg-primary-200 mb-3"></div>
@@ -50,6 +50,18 @@ import { catchError, forkJoin, map, of } from 'rxjs';
           </div>
         }
       </div>
+      @if (isLoadingMore) {
+        <div class="flex justify-center items-center py-6">
+          <div class="animate-pulse flex flex-col items-center">
+            <div class="h-8 w-8 rounded-full bg-primary-200 mb-2"></div>
+            <div class="h-3 w-16 bg-primary-100 rounded"></div>
+          </div>
+        </div>
+      } @else if (allStocksLoaded && stocks.length > 0) {
+        <div class="col-span-full text-center py-6 text-neutral-500">
+          Toutes les actions ont été chargées.
+        </div>
+      }
     }
   `
 })
@@ -58,33 +70,66 @@ export class DashboardComponent implements OnInit {
   loading = true;
   error = '';
   currentExchange: 'nasdaq' | 'cac40' = 'nasdaq';
+  currentPage: number = 1;
+  pageSize: number = 9; // Adjust based on your desired number of cards per load
+  isLoadingMore = false;
+  hasMoreStocks = true;
+  allStocksLoaded = false;
   
   constructor(private stockService: StockService, private marketService: MarketService) {}
   
   ngOnInit(): void {
+    const savedExchange = localStorage.getItem('dashboardExchangePreference');
+    if (savedExchange === 'nasdaq' || savedExchange === 'cac40') {
+      this.currentExchange = savedExchange;
+    }
     this.loadStocks();
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onScroll(event: any): void {
+    // Check if user is near the bottom of the page
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500 && !this.isLoadingMore && this.hasMoreStocks) {
+      this.loadStocks(true);
+    }
   }
 
   switchExchange(exchange: 'nasdaq' | 'cac40'): void {
     this.currentExchange = exchange;
+    localStorage.setItem('dashboardExchangePreference', exchange);
+    this.currentPage = 1;
+    this.stocks = []; // Clear existing stocks
+    this.hasMoreStocks = true;
+    this.allStocksLoaded = false;
     this.loadStocks();
   }
   
-  loadStocks(): void {
-    this.loading = true;
-    this.error = '';
-    
-    const stockList$ = this.marketService.getStocks(this.currentExchange.toUpperCase());
+  loadStocks(isScrolling: boolean = false): void {
+    if (!this.hasMoreStocks || this.isLoadingMore) {
+      return;
+    }
 
-    stockList$.pipe(
-      map(stocks => stocks.slice(0, 9)),
+    if (isScrolling) {
+      this.isLoadingMore = true;
+    } else {
+      this.loading = true;
+      this.error = '';
+    }
+    
+    this.marketService.getStocks(this.currentExchange.toUpperCase(), this.currentPage, this.pageSize).pipe(
       catchError(() => {
         this.error = 'Failed to load stock list. Please try again later.';
+        this.loading = false;
+        this.isLoadingMore = false;
+        this.hasMoreStocks = false;
         return of([]);
       })
     ).subscribe(stocks => {
       if (stocks.length === 0) {
+        this.hasMoreStocks = false;
+        this.allStocksLoaded = true;
         this.loading = false;
+        this.isLoadingMore = false;
         return;
       }
       
@@ -98,11 +143,18 @@ export class DashboardComponent implements OnInit {
         map(results => results.filter(stock => stock !== null) as StockDetail[]),
         catchError(() => {
           this.error = 'Failed to load stock details. Please try again later.';
+          this.loading = false;
+          this.isLoadingMore = false;
+          this.hasMoreStocks = false;
           return of([]);
         })
       ).subscribe(stockDetails => {
-        this.stocks = stockDetails;
+        this.stocks = [...this.stocks, ...stockDetails];
+        this.currentPage++;
+        this.hasMoreStocks = stockDetails.length === this.pageSize;
+        this.allStocksLoaded = !this.hasMoreStocks;
         this.loading = false;
+        this.isLoadingMore = false;
       });
     });
   }
