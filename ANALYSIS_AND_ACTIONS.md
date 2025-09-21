@@ -102,7 +102,18 @@ Ceci démarrera à la fois:
 
 *   **Renommage de l'application en "TradeMind"** (Voir CHANGELOG #008)
 
-## 4. Résolution des Problèmes
+## 4. Intégration d'un module d'analyse par IA
+
+**Objectif:** Ajouter une fonctionnalité d'analyse et de prédiction à l'application.
+
+**Actions et Décisions:**
+1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
+2.  **Création et Intégration d'un modèle de prédiction local:**
+    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
+    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure.
+    - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
+
+## 5. Résolution des Problèmes
 
 ### Problème: Erreurs de récupération de données yfinance
 
@@ -124,16 +135,3 @@ Ceci démarrera à la fois:
 
 ### Licence
 MIT
-
-## 5. Intégration d'un module d'analyse par IA
-
-**Objectif:** Ajouter une fonctionnalité d'analyse et de prédiction à l'application.
-
-**Actions et Décisions:**
-1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
-2.  **Création et Intégration d'un modèle de prédiction local:**
-    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
-    - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure.
-    - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
-
-

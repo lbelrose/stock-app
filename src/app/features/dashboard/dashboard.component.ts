@@ -18,7 +18,7 @@ export class DashboardComponent implements OnInit {
   stocks = signal<StockDetail[]>([]);
   loading = signal(true);
   error = signal('');
-  currentExchange = signal<'nasdaq' | 'cac40'>('nasdaq');
+  currentExchange = signal<'nasdaq' | 'cac40'>('cac40');
   currentPage = signal(1);
   pageSize: number = 9; // Adjust based on your desired number of cards per load
   isLoadingMore = signal(false);
