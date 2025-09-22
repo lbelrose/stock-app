@@ -51,7 +51,7 @@ export class StockService {
   }
 
   getPrediction(symbol: string): Observable<StockPrediction | any> {
-    return this.http.get<StockPrediction | any>(`${this.apiUrl}/analysis/${symbol}`).pipe(
+    return this.http.get<StockPrediction | any>(`${this.apiUrl}/analysis/predict/${symbol}`).pipe(
       catchError(error => {
         console.error(`Error fetching prediction for ${symbol}:`, error);
         // Return a default "error" prediction object
@@ -64,6 +64,16 @@ export class StockService {
           model_type: 'unknown',
           timestamp: Date.now()
         } as StockPrediction);
+      })
+    );
+  }
+
+  trainModel(symbol: string, modelClass: string = 'RandomForestModel', modelKwargs: any = {}): Observable<any> {
+    const body = { model_class_name: modelClass, model_kwargs: modelKwargs };
+    return this.http.post<any>(`${this.apiUrl}/analysis/train/${symbol}`, body).pipe(
+      catchError(error => {
+        console.error(`Error triggering training for ${symbol}:`, error);
+        throw new Error(`Unable to trigger training for ${symbol}`);
       })
     );
   }

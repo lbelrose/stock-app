@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 028 - Intégration Frontend des Scripts Génériques d'Entraînement et de Prédiction
+
+- Mise à jour de `src/app/shared/services/stock.service.ts` :
+    - La méthode `getPrediction` appelle désormais le nouvel endpoint `/api/analysis/predict/<string:ticker>`.
+    - Ajout d'une nouvelle méthode `trainModel` pour appeler l'endpoint `/api/analysis/train/<string:ticker>`.
+- Modification de `src/app/features/stock-detail/stock-detail.component.ts` :
+    - Ajout d'une méthode `triggerModelTraining()` pour déclencher l'entraînement du modèle via le `StockService`.
+    - Mise à jour de la logique de `loadStockData` pour utiliser la nouvelle route de prédiction générique.
+    - Ajout d'un état de chargement (`trainingLoading`) pour le bouton d'entraînement.
+- Modification de `src/app/features/stock-detail/stock-detail.component.html` pour inclure un bouton "Train Model" qui appelle `triggerModelTraining()`.
+
 ## 027 - Intégration des Scripts Génériques dans l'API Flask
 
 - Modification de `src/api/analysis/routes.py` pour ajouter de nouveaux endpoints :

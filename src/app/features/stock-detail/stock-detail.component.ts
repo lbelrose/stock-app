@@ -21,6 +21,7 @@ export class StockDetailComponent implements OnInit, OnDestroy {
   prediction = signal<StockPrediction | null>(null);
   predictionMessage = signal<string | null>(null);
   loading = signal(true);
+  trainingLoading = signal(false); // New loading state for training
   error = signal('');
   isInWatchlist = signal(false);
   
@@ -82,6 +83,31 @@ export class StockDetailComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.error.set(`Failed to load data for ${symbol}. ${err.message}`);
         this.loading.set(false);
+      }
+    });
+  }
+
+  triggerModelTraining(): void {
+    const symbol = this.symbol();
+    if (!symbol) return;
+
+    this.trainingLoading.set(true);
+    this.predictionMessage.set('Training model...');
+    this.error.set('');
+
+    this.stockService.trainModel(symbol).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        this.predictionMessage.set(response.message);
+        this.trainingLoading.set(false);
+        // Optionally, reload prediction after a delay to check for new model
+        setTimeout(() => this.loadStockData(symbol), 5000); 
+      },
+      error: (err) => {
+        this.error.set(`Failed to trigger model training: ${err.message}`);
+        this.trainingLoading.set(false);
+        this.predictionMessage.set(null);
       }
     });
   }

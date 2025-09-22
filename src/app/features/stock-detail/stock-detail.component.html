@@ -113,6 +113,13 @@
             } @else {
               <div class="h-6 bg-neutral-100 rounded w-1/2 animate-pulse"></div>
             }
+            <button (click)="triggerModelTraining()" [disabled]="trainingLoading()" class="btn btn-sm btn-secondary mt-4">
+              @if (trainingLoading()) {
+                <span class="loading loading-spinner"></span>
+              } @else {
+                <span>Train Model</span>
+              }
+            </button>
           </div>
         </div>
       </div>
