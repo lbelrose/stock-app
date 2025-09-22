@@ -107,6 +107,7 @@ Ceci démarrera à la fois:
 *   **Refactorisation Frontend (Templates/Styles & Signals) :** Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`. Conversion des propriétés réactives en `signals` pour `StockCardComponent` (`isInWatchlist`) et `StockSearchComponent` (`searchQuery`, `searchResults`, `showResults`). Application de `ChangeDetectionStrategy.OnPush` pour `StockSearchComponent` (CHANGELOG #021).
 *   **Amélioration UX :** Le marché par défaut est maintenant le CAC40 pour une expérience plus pertinente pour les utilisateurs français.
 
+*   **Amélioration des Métriques de Backtesting :** Le script de backtesting a été enrichi avec de nouvelles métriques clés : la Précision Directionnelle, le Drawdown Maximal et le Ratio de Sharpe, offrant une évaluation plus complète de la performance et du risque de la stratégie (CHANGELOG #023).
 *   **Re-exécution des Backtests :** Les backtests ont été re-exécutés pour tous les tickers sur la période du 1er semestre 2025 en utilisant les seuils optimisés. Les résultats ont été sauvegardés et les problèmes d'importation dans le script de backtesting ont été résolus (CHANGELOG #022).
 
 ## 3. Actions Stratégiques

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 023 - Amélioration des Métriques de Backtesting
+
+- Ajout de nouvelles métriques de performance au script de backtesting (`src/api/analysis/backtest.py`) :
+    - **Précision Directionnelle (Directional Accuracy)** : Pour évaluer la capacité du modèle à prédire correctement la direction du marché les jours où un signal d'achat est généré.
+    - **Drawdown Maximal (Max Drawdown)** : Pour mesurer le risque de la stratégie en identifiant la plus grande perte de capital.
+    - **Ratio de Sharpe (Sharpe Ratio)** : Pour évaluer le rendement ajusté au risque de la stratégie (avec un taux sans risque de 0 pour l'instant).
+- Mise à jour du rapport de backtesting et des résultats sauvegardés pour inclure ces nouvelles métriques.
+
 ## 022 - Re-exécution des Backtests avec Seuils Optimisés
 
 - Re-exécution des backtests pour tous les tickers sur la période du 1er semestre 2025 (01/01/2025 au 30/06/2025).

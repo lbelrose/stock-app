@@ -81,6 +81,25 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
     total_return = (1 + trade_returns).prod() - 1  # Cumulative return
     annualized_return = (1 + total_return) ** (252 / len(trade_returns)) - 1  # Rough annualization
 
+    # Directional Accuracy (for days with BUY signals)
+    directional_accuracy = (y_true[signals] == 1).mean() if len(trade_returns) > 0 else 0
+
+    # Max Drawdown
+    cumulative_returns = (1 + trade_returns).cumprod()
+    if not cumulative_returns.empty:
+        peak = cumulative_returns.expanding(min_periods=1).max()
+        drawdown = (cumulative_returns - peak) / peak
+        max_drawdown = drawdown.min()
+    else:
+        max_drawdown = 0.0
+
+    # Sharpe Ratio (assuming risk-free rate = 0 for simplicity)
+    risk_free_rate = 0
+    if std_return > 0:
+        sharpe_ratio = (avg_return_per_trade - risk_free_rate) / std_return
+    else:
+        sharpe_ratio = 0.0 # Or np.nan, depending on desired behavior
+
     # 8. Buy & Hold comparison
     bh_returns = next_returns  # Daily buy & hold
     bh_win_rate = (bh_returns > 0).mean()
@@ -100,6 +119,9 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
     print(f"Profit Factor: {profit_factor:.2f}")
     print(f"Cumulative Return (strategy): {total_return:.4f} ({total_return*100:.2f}%)")
     print(f"Annualized Return: {annualized_return*100:.2f}%")
+    print(f"Directional Accuracy (on signals): {directional_accuracy:.2%}")
+    print(f"Max Drawdown: {max_drawdown:.2%}")
+    print(f"Sharpe Ratio: {sharpe_ratio:.2f}")
     print("-" * 50)
     print(f"Buy & Hold - Win Rate: {bh_win_rate:.2%}")
     print(f"Buy & Hold - Avg Return: {bh_avg_return:.4f}")
@@ -118,6 +140,9 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
         "profit_factor": float(profit_factor),
         "cumulative_return": float(total_return),
         "annualized_return": float(annualized_return),
+        "directional_accuracy": float(directional_accuracy),
+        "max_drawdown": float(max_drawdown),
+        "sharpe_ratio": float(sharpe_ratio),
         "buy_and_hold_return": float(bh_total_return),
         "timestamp": datetime.now().isoformat()
     }
