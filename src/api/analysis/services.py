@@ -6,13 +6,32 @@ import os
 from sklearn.ensemble import RandomForestClassifier
 from .features import generate_technical_features
 
-
+import json
 import subprocess
 import sys
 
 class PredictionService:
     _models = {}  # Cache for loaded models
     _training_processes = {} # Track running training processes
+    _optimized_thresholds = {} # Cache for optimized thresholds
+
+    @classmethod
+    def _load_optimized_thresholds(cls):
+        """Loads optimized thresholds from the JSON file."""
+        if cls._optimized_thresholds.keys(): # Already loaded
+            return
+
+        thresholds_path = os.path.join(os.path.dirname(__file__), 'optimized_thresholds.json')
+        try:
+            with open(thresholds_path, 'r') as f:
+                cls._optimized_thresholds = json.load(f)
+            print(f"Successfully loaded optimized thresholds from {thresholds_path}")
+        except FileNotFoundError:
+            print(f"Warning: Optimized thresholds file not found at {thresholds_path}. Using default values.")
+            cls._optimized_thresholds = {}
+        except json.JSONDecodeError:
+            print(f"Warning: Could not decode JSON from {thresholds_path}. Using default values.")
+            cls._optimized_thresholds = {}
 
     @classmethod
     def _get_model_path(cls, ticker: str) -> (str, str):
@@ -45,6 +64,7 @@ class PredictionService:
         - If a training process is already running, notify the user.
         - If training fails (model still doesn't exist on next request), use the general model as a fallback.
         """
+        cls._load_optimized_thresholds() # Ensure thresholds are loaded
         specialist_path, general_path = cls._get_model_path(ticker)
 
         if os.path.exists(specialist_path):
@@ -114,8 +134,10 @@ class PredictionService:
         proba = model.predict_proba(last_row)[0]
         p_up, p_down = proba[1], proba[0]
 
-        buy_threshold = 0.55  # Adjusted for potentially more 'average' models
-        sell_threshold = 0.65
+        # Get optimized or default thresholds
+        ticker_thresholds = cls._optimized_thresholds.get(ticker.split(".")[0], {})
+        buy_threshold = ticker_thresholds.get('optimal_buy_threshold', 0.55)
+        sell_threshold = ticker_thresholds.get('optimal_sell_threshold', 0.65) # Assuming a sell threshold might exist
 
         if p_up > buy_threshold:
             signal = "BUY"
@@ -133,6 +155,8 @@ class PredictionService:
             "confidence": f"{max(0.0, min(1.0, confidence)):.2f}",
             "probability_up": f"{p_up:.4f}",
             "probability_down": f"{p_down:.4f}",
+            "buy_threshold": buy_threshold,
             "model_type": model_type,
             "timestamp": pd.Timestamp.now(tz='UTC').isoformat()
         }
+    

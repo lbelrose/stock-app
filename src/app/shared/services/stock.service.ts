@@ -59,7 +59,10 @@ export class StockService {
           ticker: symbol, 
           signal: 'ERROR', 
           confidence: '0.00', 
-          model_status: 'offline' 
+          probability_up: 0,
+          probability_down: 0,
+          model_type: 'unknown',
+          timestamp: Date.now()
         } as StockPrediction);
       })
     );

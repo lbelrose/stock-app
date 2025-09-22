@@ -119,10 +119,11 @@ import { StockChartComponent } from './stock-chart/stock-chart.component';
                   {{ prediction.signal }}
                 </span>
                 <span class="text-primary-800 font-medium">
-                  ({{ prediction.confidence | percent }})
+                  ({{ prediction.probability_up | percent }})
                 </span>
               </div>
-              <p class="text-xs text-primary-600 mt-1">Model: {{ prediction.model_status }}</p>
+              <p class="text-xs text-primary-600 mt-1">Seuil d'achat: {{ prediction.buy_threshold | percent }}</p>
+              <p class="text-xs text-primary-600 mt-1">Modèle: {{ prediction.model_type }}</p>
             } @else {
               <div class="h-6 bg-neutral-100 rounded w-1/2 animate-pulse"></div>
             }
