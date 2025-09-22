@@ -1,0 +1,27 @@
+<div class="mt-4">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-xl font-semibold">Price Chart</h3>
+    <div class="flex flex-wrap gap-2">
+      <div class="flex gap-2">
+        <button *ngFor="let period of periods" 
+                (click)="selectedPeriod.set(period.value)"
+                [ngClass]="selectedPeriod() === period.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
+                class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
+          {{ period.label }}
+        </button>
+      </div>
+      <div class="flex gap-2">
+        <button *ngFor="let interval of intervals" 
+                (click)="selectedInterval.set(interval.value)"
+                [ngClass]="selectedInterval() === interval.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
+                class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
+          {{ interval.label }}
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="chart-container">
+    <canvas #chartCanvas></canvas>
+  </div>
+</div>

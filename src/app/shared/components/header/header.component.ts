@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { StockSearchComponent } from '../stock-search/stock-search.component';
 
@@ -7,6 +7,7 @@ import { StockSearchComponent } from '../stock-search/stock-search.component';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, StockSearchComponent],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {}

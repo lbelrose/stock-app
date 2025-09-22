@@ -104,6 +104,7 @@ Ceci démarrera à la fois:
 *   **Intégration de l'IA :** Développement d'un module de prédiction (Random Forest) pour anticiper les tendances du marché. Le backend a été doté d'un service et d'une route API dédiée, et le frontend mis à jour pour afficher ces prédictions (CHANGELOG #014).
 *   **Refactorisation Backend :** L'API Flask a été restructurée pour être plus modulaire (Blueprints) et utilise désormais des fichiers CSV locaux pour une meilleure fiabilité des listes d'actions (CHANGELOG #014).
 *   **Mise à Jour Frontend :** L'application a été migrée vers Angular 21. Les composants principaux ont été refactorisés avec des fichiers dédiés et l'état est maintenant géré par les signaux Angular pour une meilleure performance (CHANGELOG #019).
+*   **Refactorisation Frontend (Templates/Styles & Signals) :** Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`. Conversion des propriétés réactives en `signals` pour `StockCardComponent` (`isInWatchlist`) et `StockSearchComponent` (`searchQuery`, `searchResults`, `showResults`). Application de `ChangeDetectionStrategy.OnPush` pour `StockSearchComponent` (CHANGELOG #021).
 *   **Amélioration UX :** Le marché par défaut est maintenant le CAC40 pour une expérience plus pertinente pour les utilisateurs français.
 
 ## 3. Actions Stratégiques

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, signal, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { StockDetail } from '../../../shared/models/stock.model';
@@ -11,51 +11,24 @@ Chart.register(...registerables);
   selector: 'app-stock-chart',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="mt-4">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-xl font-semibold">Price Chart</h3>
-        <div class="flex gap-2">
-          <div class="flex gap-2">
-            <button *ngFor="let period of periods" 
-                    (click)="setPeriod(period.value)"
-                    [ngClass]="selectedPeriod === period.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
-                    class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
-              {{ period.label }}
-            </button>
-          </div>
-          <div class="flex gap-2">
-            <button *ngFor="let interval of intervals" 
-                    (click)="setInterval(interval.value)"
-                    [ngClass]="selectedInterval === interval.value ? 'bg-primary-100 text-primary-700' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'"
-                    class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
-              {{ interval.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <div class="chart-container">
-        <canvas #chartCanvas></canvas>
-      </div>
-    </div>
-  `
+  templateUrl: './stock-chart.component.html',
+  styleUrls: ['./stock-chart.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StockChartComponent implements OnChanges {
-  @Input() stock!: StockDetail;
+export class StockChartComponent {
+  @Input({ required: true }) stock!: StockDetail;
   @ViewChild('chartCanvas', { static: true }) chartCanvas!: ElementRef;
   
   private chart: Chart | null = null;
-  private historicalData: any[] = [];
   
-  periods = [
+  readonly periods = [
     { label: '1D', value: '1d' },
     { label: '7D', value: '7d' },
     { label: '1M', value: '1mo' },
     { label: '1Y', value: '1y' }
   ];
 
-  intervals = [
+  readonly intervals = [
     { label: '1m', value: '1m' },
     { label: '5m', value: '5m' },
     { label: '15m', value: '15m' },
@@ -63,74 +36,61 @@ export class StockChartComponent implements OnChanges {
     { label: '1h', value: '1h' }
   ];
   
-  selectedPeriod = '1d'; 
-  selectedInterval = '15m'; 
+  selectedPeriod = signal('1d'); 
+  selectedInterval = signal('15m'); 
   
-  constructor(private stockService: StockService) {}
-  
-  ngOnChanges(): void {
-    if (this.stock) {
-      this.fetchAndCreateChart();
-    }
-  }
-  
-  setPeriod(period: string): void {
-    this.selectedPeriod = period;
-    this.fetchAndCreateChart();
-  }
-
-  setInterval(interval: string): void {
-    this.selectedInterval = interval;
-    this.fetchAndCreateChart();
-  }
-  
-  private fetchAndCreateChart(): void {
-    if (!this.stock) return;
-
-    this.stockService.getStockHistory(this.stock.symbol, this.selectedPeriod, this.selectedInterval).subscribe({
-      next: (data) => {
-        this.historicalData = data;
-        this.createChart();
-      },
-      error: (err) => {
-        console.error(`Error fetching historical data for ${this.stock.symbol} with period ${this.selectedPeriod} and interval ${this.selectedInterval}:`, err);
-        this.historicalData = []; // Clear data on error
-        this.createChart(); // Re-create chart with empty data
+  constructor(private stockService: StockService) {
+    effect(() => {
+      const stock = this.stock;
+      const period = this.selectedPeriod();
+      const interval = this.selectedInterval();
+      
+      if (stock) {
+        this.fetchAndCreateChart(stock.symbol, period, interval);
       }
     });
   }
   
-  private createChart(): void {
+  private fetchAndCreateChart(symbol: string, period: string, interval: string): void {
+    this.stockService.getStockHistory(symbol, period, interval).subscribe({
+      next: (data) => {
+        this.createChart(data);
+      },
+      error: (err) => {
+        console.error(`Error fetching historical data for ${symbol} with period ${period} and interval ${interval}:`, err);
+        this.createChart([]); // Re-create chart with empty data
+      }
+    });
+  }
+  
+  private createChart(historicalData: any[]): void {
     if (!this.stock) return;
     
-    // If chart already exists, destroy it
     if (this.chart) {
       this.chart.destroy();
     }
     
-    // Get the context for the chart
     const ctx = this.chartCanvas.nativeElement.getContext('2d');
     
-    // Determine labels and data based on historicalData and selectedInterval
     let labels: string[] = [];
     let data: number[] = [];
 
-    if (this.historicalData.length > 0) {
-      labels = this.historicalData.map(item => {
+    if (historicalData.length > 0) {
+      labels = historicalData.map(item => {
         const date = new Date(item.datetime);
-        if (this.selectedPeriod === '1d') {
+        const period = this.selectedPeriod();
+        if (period === '1d') {
           return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        } else if (this.selectedPeriod === '7d' || this.selectedPeriod === '1mo') {
+        } else if (period === '7d' || period === '1mo') {
           return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-        } else if (this.selectedPeriod === '1y') {
+        } else if (period === '1y') {
           return date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
         }
-        return date.toLocaleDateString('fr-FR'); // Default fallback
+        return date.toLocaleDateString('fr-FR');
       });
-      data = this.historicalData.map(item => item.close);
+      data = historicalData.map(item => item.close);
     }
     
-    // Create the chart
     this.chart = new Chart(ctx, {
       type: 'line',
       data: {

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 021 - Refactorisation Frontend : Migration des Templates/Styles et Signals
+
+- Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`.
+- Conversion des propriétés réactives en `signals` pour `StockCardComponent` (`isInWatchlist`) et `StockSearchComponent` (`searchQuery`, `searchResults`, `showResults`).
+- Application de `ChangeDetectionStrategy.OnPush` pour `StockSearchComponent`.
+
 ## 020 - Intégration des Seuils Optimisés de Prédiction
 
 - Intégration des seuils d'achat optimisés par ticker dans le script de prédiction.
