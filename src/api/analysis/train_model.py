@@ -169,7 +169,23 @@ if __name__ == "__main__":
         default="RandomForestModel",
         help="The class name of the model to train (e.g., 'RandomForestModel')."
     )
-    args = parser.parse_args()
+    
+    # Parse known arguments, and collect the rest as model_kwargs
+    args, unknown = parser.parse_known_args()
+
+    model_kwargs = {}
+    # Convert unknown arguments (e.g., --n_estimators 100) into a dictionary
+    for i in range(0, len(unknown), 2):
+        key = unknown[i].lstrip('--')
+        value = unknown[i+1]
+        # Attempt to convert to int or float if possible
+        try:
+            model_kwargs[key] = int(value)
+        except ValueError:
+            try:
+                model_kwargs[key] = float(value)
+            except ValueError:
+                model_kwargs[key] = value
 
     ticker = args.ticker.upper()
-    train_model(ticker=ticker, model_class_name=args.model_class)
+    train_model(ticker=ticker, model_class_name=args.model_class, **model_kwargs)

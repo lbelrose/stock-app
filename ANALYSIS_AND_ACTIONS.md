@@ -107,6 +107,7 @@ Ceci démarrera à la fois:
 *   **Refactorisation Frontend (Templates/Styles & Signals) :** Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`. Conversion des propriétés réactives en `signals` pour `StockCardComponent` (`isInWatchlist`) et `StockSearchComponent` (`searchQuery`, `searchResults`, `showResults`). Application de `ChangeDetectionStrategy.OnPush` pour `StockSearchComponent` (CHANGELOG #021).
 *   **Amélioration UX :** Le marché par défaut est maintenant le CAC40 pour une expérience plus pertinente pour les utilisateurs français.
 
+*   **Scripts d'Entraînement et de Prédiction Génériques :** Des scripts génériques ont été introduits pour l'entraînement (`generic_train_all_models.py`) et la prédiction (`predict_next_day.py`) des modèles IA. Un fichier `model_configs.json` centralise les hyperparamètres, et `optimized_thresholds.json` inclut désormais le nom de la classe de modèle pour chaque ticker, rendant l'architecture plus flexible et extensible (CHANGELOG #026).
 *   **Amélioration de l'Évaluation du Modèle avec Validation Croisée Temporelle :** Le script d'entraînement (`train_model.py`) a été mis à jour pour inclure une évaluation plus robuste via la validation croisée temporelle. Cela permet de calculer et d'afficher les métriques de performance (précision, rappel, F1-score, exactitude) pour chaque split, ainsi que leurs moyennes, offrant une meilleure compréhension de la généralisation du modèle (CHANGELOG #025).
 *   **Amélioration des Métriques de Backtesting :** Le script de backtesting a été enrichi avec de nouvelles métriques clés : la Précision Directionnelle, le Drawdown Maximal et le Ratio de Sharpe, offrant une évaluation plus complète de la performance et du risque de la stratégie (CHANGELOG #023).
 *   **Re-exécution des Backtests :** Les backtests ont été re-exécutés pour tous les tickers sur la période du 1er semestre 2025 en utilisant les seuils optimisés. Les résultats ont été sauvegardés et les problèmes d'importation dans le script de backtesting ont été résolus (CHANGELOG #022).
@@ -125,12 +126,16 @@ Ceci démarrera à la fois:
     - Création d'une classe abstraite `BaseModel` (`src/api/analysis/models/base_model.py`) pour définir une interface commune (entraînement, prédiction, sauvegarde, chargement).
     - Implémentation d'une classe de modèle concrète `RandomForestModel` (`src/api/analysis/models/random_forest_model.py`) héritant de `BaseModel`.
     - Création d'un `ModelFactory` (`src/api/analysis/models/model_factory.py`) pour l'instanciation dynamique des modèles.
-3.  **Création et Intégration d'un modèle de prédiction local:**
+3.  **Scripts Génériques d'Entraînement et de Prédiction :**
+    - Création de `model_configs.json` pour centraliser les hyperparamètres des différents types de modèles.
+    - Création de `generic_train_all_models.py` pour orchestrer l'entraînement de tous les modèles.
+    - Création de `predict_next_day.py` pour effectuer des prédictions en utilisant la nouvelle architecture.
+4.  **Création et Intégration d'un modèle de prédiction local:**
     - Le script d'entraînement (`train_model.py`) a été adapté pour utiliser la nouvelle architecture modulaire, permettant de créer et d'entraîner des modèles via le `ModelFactory`.
     - Le script de backtesting (`backtest.py`) a également été adapté pour charger et utiliser les modèles via la nouvelle architecture, en tirant parti de `BaseModel.load` et `ModelFactory`.
     - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure. Le script `predict_next_day.py` utilise désormais les seuils d'achat optimisés par ticker, chargés depuis `optimized_thresholds.json`.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
-4.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
+5.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
 
 ## 5. Résolution des Problèmes
 

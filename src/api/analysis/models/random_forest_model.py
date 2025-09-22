@@ -6,11 +6,19 @@ class RandomForestModel(BaseModel):
     Implémentation d'un modèle RandomForestClassifier.
     """
 
-    def __init__(self, ticker: str, features: list, n_estimators=100, random_state=42):
+    def __init__(self, ticker: str, features: list, **kwargs):
         super().__init__(ticker, features)
-        self.n_estimators = n_estimators
-        self.random_state = random_state
-        self.model = RandomForestClassifier(n_estimators=self.n_estimators, random_state=self.random_state)
+        # Définir les hyperparamètres par défaut et les surcharger avec kwargs
+        default_params = {
+            "n_estimators": 100,
+            "max_depth": 5,
+            "min_samples_split": 20,
+            "min_samples_leaf": 10,
+            "random_state": 42,
+            "n_jobs": -1
+        }
+        final_params = {**default_params, **kwargs}
+        self.model = RandomForestClassifier(**final_params)
 
     def train(self, X_train, y_train, **kwargs):
         """

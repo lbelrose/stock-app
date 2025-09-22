@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 026 - Scripts d'Entraînement et de Prédiction Génériques
+
+- Introduction de scripts génériques pour l'entraînement et la prédiction des modèles IA :
+    - Création de `model_configs.json` pour centraliser les hyperparamètres des différents types de modèles.
+    - Création de `generic_train_all_models.py` pour entraîner tous les modèles spécifiés dans `optimized_thresholds.json` en utilisant les configurations de `model_configs.json` et la nouvelle architecture modulaire.
+    - Création de `predict_next_day.py` (anciennement inexistant) pour effectuer des prédictions en utilisant la nouvelle architecture modulaire et les seuils optimisés.
+- Mise à jour de `optimized_thresholds.json` pour inclure le `model_class_name` pour chaque ticker, assurant la compatibilité avec la nouvelle architecture.
+
 ## 025 - Amélioration de l'Évaluation du Modèle avec Validation Croisée Temporelle
 
 - Implémentation d'une évaluation plus robuste des modèles dans `train_model.py` en utilisant la validation croisée temporelle (`TimeSeriesSplit`).
