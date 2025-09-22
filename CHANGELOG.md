@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 027 - Intégration des Scripts Génériques dans l'API Flask
+
+- Modification de `src/api/analysis/routes.py` pour ajouter de nouveaux endpoints :
+    - `/api/analysis/train/<string:ticker>` (POST) pour déclencher l'entraînement d'un modèle spécifique avec des hyperparamètres optionnels.
+    - `/api/analysis/predict/<string:ticker>` (GET) pour obtenir une prédiction en utilisant le script générique de prédiction.
+- Renommage de la classe `PredictionService` en `AnalysisService` dans `src/api/analysis/services.py` pour refléter son rôle élargi.
+- Implémentation des méthodes `train_model_generic` et `get_prediction_generic` dans `AnalysisService` pour appeler les scripts génériques d'entraînement et de prédiction via `subprocess`.
+- Suppression de la logique de chargement de modèle et de prédiction interne de `services.py`, car elle est désormais gérée par les scripts génériques.
+
 ## 026 - Scripts d'Entraînement et de Prédiction Génériques
 
 - Introduction de scripts génériques pour l'entraînement et la prédiction des modèles IA :

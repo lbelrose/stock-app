@@ -107,10 +107,11 @@ Ceci démarrera à la fois:
 *   **Refactorisation Frontend (Templates/Styles & Signals) :** Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`. Conversion des propriétés réactives en `signals` pour `StockCardComponent` (`isInWatchlist`) et `StockSearchComponent` (`searchQuery`, `searchResults`, `showResults`). Application de `ChangeDetectionStrategy.OnPush` pour `StockSearchComponent` (CHANGELOG #021).
 *   **Amélioration UX :** Le marché par défaut est maintenant le CAC40 pour une expérience plus pertinente pour les utilisateurs français.
 
+*   **Intégration des Scripts Génériques dans l'API Flask :** L'API Flask a été mise à jour pour intégrer les scripts génériques d'entraînement et de prédiction. De nouveaux endpoints (`/api/analysis/train/<ticker>` et `/api/analysis/predict/<ticker>`) ont été ajoutés, et la classe `PredictionService` a été renommée en `AnalysisService` pour gérer ces opérations de manière modulaire (CHANGELOG #027).
 *   **Scripts d'Entraînement et de Prédiction Génériques :** Des scripts génériques ont été introduits pour l'entraînement (`generic_train_all_models.py`) et la prédiction (`predict_next_day.py`) des modèles IA. Un fichier `model_configs.json` centralise les hyperparamètres, et `optimized_thresholds.json` inclut désormais le nom de la classe de modèle pour chaque ticker, rendant l'architecture plus flexible et extensible (CHANGELOG #026).
 *   **Amélioration de l'Évaluation du Modèle avec Validation Croisée Temporelle :** Le script d'entraînement (`train_model.py`) a été mis à jour pour inclure une évaluation plus robuste via la validation croisée temporelle. Cela permet de calculer et d'afficher les métriques de performance (précision, rappel, F1-score, exactitude) pour chaque split, ainsi que leurs moyennes, offrant une meilleure compréhension de la généralisation du modèle (CHANGELOG #025).
 *   **Amélioration des Métriques de Backtesting :** Le script de backtesting a été enrichi avec de nouvelles métriques clés : la Précision Directionnelle, le Drawdown Maximal et le Ratio de Sharpe, offrant une évaluation plus complète de la performance et du risque de la stratégie (CHANGELOG #023).
-*   **Re-exécution des Backtests :** Les backtests ont été re-exécutés pour tous les tickers sur la période du 1er semestre 2025 en utilisant les seuils optimisés. Les résultats ont été sauvegardés et les problèmes d'importation dans le script de backtesting ont été résolus (CHANGELOG #022).
+*   **Re-exécution des Backtests :** Les backtests ont ��té re-exécutés pour tous les tickers sur la période du 1er semestre 2025 en utilisant les seuils optimisés. Les résultats ont été sauvegardés et les problèmes d'importation dans le script de backtesting ont été résolus (CHANGELOG #022).
 
 ## 3. Actions Stratégiques
 
@@ -130,12 +131,15 @@ Ceci démarrera à la fois:
     - Création de `model_configs.json` pour centraliser les hyperparamètres des différents types de modèles.
     - Création de `generic_train_all_models.py` pour orchestrer l'entraînement de tous les modèles.
     - Création de `predict_next_day.py` pour effectuer des prédictions en utilisant la nouvelle architecture.
-4.  **Création et Intégration d'un modèle de prédiction local:**
+4.  **Intégration des Scripts Génériques dans l'API Flask :**
+    - Modification de `src/api/analysis/routes.py` pour ajouter des endpoints pour l'entraînement et la prédiction génériques.
+    - Renommage de la classe `PredictionService` en `AnalysisService` dans `src/api/analysis/services.py` et implémentation des méthodes `train_model_generic` et `get_prediction_generic`.
+5.  **Création et Intégration d'un modèle de prédiction local:**
     - Le script d'entraînement (`train_model.py`) a été adapté pour utiliser la nouvelle architecture modulaire, permettant de créer et d'entraîner des modèles via le `ModelFactory`.
     - Le script de backtesting (`backtest.py`) a également été adapté pour charger et utiliser les modèles via la nouvelle architecture, en tirant parti de `BaseModel.load` et `ModelFactory`.
     - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure. Le script `predict_next_day.py` utilise désormais les seuils d'achat optimisés par ticker, chargés depuis `optimized_thresholds.json`.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
-5.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
+6.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
 
 ## 5. Résolution des Problèmes
 
