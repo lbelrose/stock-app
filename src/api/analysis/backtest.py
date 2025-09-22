@@ -1,24 +1,13 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
-from sklearn.model_selection import TimeSeriesSplit
-import joblib
 import os
 from datetime import datetime
 import argparse
+
 from features import generate_technical_features
-
-def load_model_and_features(model_name="buy_signal_classifier_general.joblib"):
-    """
-    Loads a specified trained model and its feature list.
-    """
-    model_path = os.path.join(os.path.dirname(__file__), 'models', model_name)
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model not found at {model_path}. Run train_model.py first.")
-
-    payload = joblib.load(model_path)
-    return payload['model'], payload['features']
-
+from models.base_model import BaseModel
+from models.model_factory import ModelFactory
 
 def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", buy_threshold=0.55, model_name="buy_signal_classifier_general.joblib"):
     """
@@ -38,8 +27,19 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
     print("Generating features...")
     feature_df = generate_technical_features(data)
 
-    # 3. Load model
-    model, feature_names = load_model_and_features(model_name)
+    # 3. Load model using the new modular architecture
+    # We need to extract the ticker from model_name to load it correctly
+    # Assuming model_name format is 'buy_signal_classifier_{ticker}.joblib'
+    model_ticker = model_name.replace('buy_signal_classifier_', '').replace('.joblib', '').upper()
+    
+    # Load the payload (which contains model_class_name, model, features)
+    payload = BaseModel.load(model_ticker, directory=os.path.join(os.path.dirname(__file__), 'models'))
+    
+    # Re-instantiate the specific model class using ModelFactory
+    model_instance = ModelFactory.create_model(payload['model_class'], payload['ticker'], payload['features'])
+    model_instance.model = payload['model'] # Assign the loaded sklearn model to the instance
+    
+    feature_names = payload['features']
     print(f"Model loaded. Using {len(feature_names)} features.")
 
     # 4. Prepare dataset with lag (no future data)
@@ -61,8 +61,8 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
     y_true = model_data['target']
     next_returns = model_data['next_return']
 
-    # 5. Predict probabilities
-    proba = model.predict_proba(X)[:, 1]  # Probability of "Up"
+    # 5. Predict probabilities using the model instance
+    proba = model_instance.predict_proba(X)  # Probability of "Up"
     signals = (proba >= buy_threshold)
 
     # 6. Extract trades
@@ -170,4 +170,5 @@ if __name__ == "__main__":
 
     print(f"--- Backtesting with model {args.model_name} on {args.ticker} ---")
     run_backtest(ticker=args.ticker, start_date=args.start_date, end_date=args.end_date, buy_threshold=args.buy_threshold, model_name=args.model_name)
+
 

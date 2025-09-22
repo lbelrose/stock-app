@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 024 - Modularisation de l'Architecture des Modèles IA
+
+- Introduction d'une architecture modulaire pour les modèles de prédiction :
+    - Création d'une classe abstraite `BaseModel` (`src/api/analysis/models/base_model.py`) pour définir une interface commune (entraînement, prédiction, sauvegarde, chargement).
+    - Implémentation d'une classe de modèle concrète `RandomForestModel` (`src/api/analysis/models/random_forest_model.py`) héritant de `BaseModel`.
+    - Création d'un `ModelFactory` (`src/api/analysis/models/model_factory.py`) pour l'instanciation dynamique des modèles.
+- Adaptation des scripts `train_model.py` et `backtest.py` pour utiliser cette nouvelle architecture modulaire, permettant une gestion et une extension plus faciles des différents types de modèles.
+
 ## 023 - Amélioration des Métriques de Backtesting
 
 - Ajout de nouvelles métriques de performance au script de backtesting (`src/api/analysis/backtest.py`) :

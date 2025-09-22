@@ -120,11 +120,16 @@ Ceci démarrera à la fois:
 
 **Actions et Décisions:**
 1.  **Analyse du projet `Alphon`:** Non intégré directement, inspiration pour la "featurization".
-2.  **Création et Intégration d'un modèle de prédiction local:**
-    - Script d'entraînement (`train_model.py`) pour un modèle `RandomForestClassifier` (classification de la direction du prix).
+2.  **Modularisation de l'Architecture des Modèles :**
+    - Création d'une classe abstraite `BaseModel` (`src/api/analysis/models/base_model.py`) pour définir une interface commune (entraînement, prédiction, sauvegarde, chargement).
+    - Implémentation d'une classe de modèle concrète `RandomForestModel` (`src/api/analysis/models/random_forest_model.py`) héritant de `BaseModel`.
+    - Création d'un `ModelFactory` (`src/api/analysis/models/model_factory.py`) pour l'instanciation dynamique des modèles.
+3.  **Création et Intégration d'un modèle de prédiction local:**
+    - Le script d'entraînement (`train_model.py`) a été adapté pour utiliser la nouvelle architecture modulaire, permettant de créer et d'entraîner des modèles via le `ModelFactory`.
+    - Le script de backtesting (`backtest.py`) a également été adapté pour charger et utiliser les modèles via la nouvelle architecture, en tirant parti de `BaseModel.load` et `ModelFactory`.
     - Backend Flask: Nouveau module `analysis` avec `PredictionService` et route API. La fonction `get_prediction` persiste chaque modèle spécialisé généré pour une utilisation ultérieure. Le script `predict_next_day.py` utilise désormais les seuils d'achat optimisés par ticker, chargés depuis `optimized_thresholds.json`.
     - Frontend Angular: Mise à jour de `stock.model.ts`, `stock.service.ts` et `stock-detail.component.ts` pour afficher les prédictions.
-3.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
+4.  **Gestion des Modèles :** Le répertoire `src/api/analysis/models/` est maintenant suivi par Git pour versionner les modèles entraînés avec le code source.
 
 ## 5. Résolution des Problèmes
 
