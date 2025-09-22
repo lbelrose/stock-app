@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 025 - Amélioration de l'Évaluation du Modèle avec Validation Croisée Temporelle
+
+- Implémentation d'une évaluation plus robuste des modèles dans `train_model.py` en utilisant la validation croisée temporelle (`TimeSeriesSplit`).
+- Calcul et affichage des métriques de performance (précision, rappel, F1-score, exactitude) pour chaque split de validation.
+- Calcul et affichage des moyennes de ces métriques sur l'ensemble des splits pour une évaluation plus fiable de la généralisation du modèle.
+
 ## 024 - Modularisation de l'Architecture des Modèles IA
 
 - Introduction d'une architecture modulaire pour les modèles de prédiction :

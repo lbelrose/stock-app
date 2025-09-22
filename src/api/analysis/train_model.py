@@ -72,13 +72,55 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
     if not X.index.is_monotonic_increasing:
         raise ValueError("Index is not sorted in ascending order.")
 
-    # TimeSeriesSplit: use last split for evaluation
+    # TimeSeriesSplit: Evaluate performance across multiple splits
     tscv = TimeSeriesSplit(n_splits=5)
-    X_train, X_test, y_train, y_test = None, None, None, None
+    
+    accuracies = []
+    reports = []
+    cms = []
+    
+    print("\n--- Starting Time Series Cross-Validation ---")
+    for fold, (train_index, test_index) in enumerate(tscv.split(X)):
+        print(f"\nFold {fold + 1}/{tscv.n_splits}")
+        X_train_fold, X_test_fold = X.iloc[train_index], X.iloc[test_index]
+        y_train_fold, y_test_fold = y.iloc[train_index], y.iloc[test_index]
 
-    for train_index, test_index in tscv.split(X):
-        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+        # Create a fresh model instance for each fold to avoid data leakage
+        fold_model_instance = ModelFactory.create_model(model_class_name, ticker, selected_features, **model_kwargs)
+        fold_model_instance.train(X_train_fold, y_train_fold)
+
+        y_pred_fold = fold_model_instance.model.predict(X_test_fold)
+        accuracy_fold = accuracy_score(y_test_fold, y_pred_fold)
+        report_fold = classification_report(y_test_fold, y_pred_fold, target_names=["Down (0)", "Up (1)"], output_dict=True)
+        cm_fold = confusion_matrix(y_test_fold, y_pred_fold)
+
+        accuracies.append(accuracy_fold)
+        reports.append(report_fold)
+        cms.append(cm_fold)
+
+        print(f"  Accuracy: {accuracy_fold:.4f}")
+        # print("  Classification Report:")
+        # print(classification_report(y_test_fold, y_pred_fold, target_names=["Down (0)", "Up (1)"]))
+        # print("  Confusion Matrix:")
+        # print(cm_fold)
+
+    print("\n--- Cross-Validation Summary ---")
+    print(f"Average Accuracy: {np.mean(accuracies):.4f} (+/- {np.std(accuracies):.4f})")
+    
+    # Calculate average precision, recall, f1-score for class 1 (Up)
+    avg_precision_up = np.mean([r['Up (1)']['precision'] for r in reports])
+    avg_recall_up = np.mean([r['Up (1)']['recall'] for r in reports])
+    avg_f1_up = np.mean([r['Up (1)']['f1-score'] for r in reports])
+    
+    print(f"Average Precision (Up): {avg_precision_up:.4f}")
+    print(f"Average Recall (Up): {avg_recall_up:.4f}")
+    print(f"Average F1-Score (Up): {avg_f1_up:.4f}")
+    print("--------------------------------------------")
+
+    # Re-run for the final model to be saved (using the last split for consistency with previous behavior)
+    print("\n--- Final Model Training and Evaluation (Last Split) ---")
+    X_train, X_test = X.iloc[train_index], X.iloc[test_index] # Use the last split
+    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
 
     print(f"Training size: {len(X_train)}, Test size: {len(X_test)}")
 
