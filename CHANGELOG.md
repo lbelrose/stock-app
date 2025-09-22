@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 022 - Re-exécution des Backtests avec Seuils Optimisés
+
+- Re-exécution des backtests pour tous les tickers sur la période du 1er semestre 2025 (01/01/2025 au 30/06/2025).
+- Utilisation des seuils d'achat optimisés et des modèles spécifiques à chaque action, chargés depuis `optimized_thresholds.json`.
+- Les résultats des backtests ont été sauvegardés dans le répertoire `src/api/analysis/backtest_results`.
+- Correction de l'erreur d'importation relative dans `src/api/analysis/backtest.py` en changeant `from .features import generate_technical_features` en `from features import generate_technical_features`.
+- Création et suppression d'un script temporaire `run_all_backtests.py` pour orchestrer l'exécution des backtests.
+
 ## 021 - Refactorisation Frontend : Migration des Templates/Styles et Signals
 
 - Migration des templates et styles inline vers des fichiers dédiés pour `StockCardComponent` et `StockSearchComponent`.

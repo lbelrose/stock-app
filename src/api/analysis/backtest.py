@@ -6,7 +6,7 @@ import joblib
 import os
 from datetime import datetime
 import argparse
-from .features import generate_technical_features
+from features import generate_technical_features
 
 def load_model_and_features(model_name="buy_signal_classifier_general.joblib"):
     """
