@@ -1,9 +1,8 @@
 import os
 
-import json
 import subprocess
 import sys
-
+from  .predict_next_day import predict_next_day 
 
 class AnalysisService:
     _training_processes = {} # Track running training processes
@@ -43,45 +42,10 @@ class AnalysisService:
             "status": "training_started",
             "message": f"A specialist model for {ticker} is being generated. Please try again in a few minutes."
         }
-
+    
     @classmethod
     def get_prediction_generic(cls, ticker: str) -> dict:
         """
         Provides a buy/sell/hold prediction for a given stock ticker using the generic prediction script.
         """
-        python_executable = sys.executable
-        command = [
-            python_executable,
-            "-m", "analysis.predict_next_day", # Call predict_next_day as a module
-            "--ticker", ticker
-        ]
-        
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')) # src/api
-        try:
-            result = subprocess.run(command, cwd=project_root, capture_output=True, text=True, check=True)
-            # The predict_next_day script prints the JSON output, so we need to parse it
-            output_lines = result.stdout.strip().split('\n')
-            # Find the JSON part, which is usually the last part of the output
-            json_output = "{}"
-            for line in reversed(output_lines):
-                if line.startswith('{') and line.endswith('}'):
-                    json_output = line
-                    break
-            
-            prediction_data = json.loads(json_output)
-            return prediction_data
-        except subprocess.CalledProcessError as e:
-            print(f"Error running prediction for {ticker}: {e}")
-            print(e.stdout)
-            print(e.stderr)
-            raise ValueError(f"Prediction failed for {ticker}: {e.stderr}")
-        except json.JSONDecodeError as e:
-            print(f"JSON Decode Error for {ticker}: {e}")
-            print(f"Raw stdout: {result.stdout}")
-            raise ValueError(f"Failed to parse prediction output for {ticker}.")
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Prediction script or model not found for {ticker}.")
-        except Exception as e:
-            print(f"An unexpected error occurred during prediction for {ticker}: {e}")
-            raise
-    
+        return predict_next_day(ticker.split('.')[0])

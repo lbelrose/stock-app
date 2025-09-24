@@ -1,13 +1,11 @@
-import pandas as pd
 import yfinance as yf
 import os
 import json
-import argparse
 from datetime import datetime, timedelta
 
-from features import generate_technical_features
-from models.base_model import BaseModel
-from models.model_factory import ModelFactory
+from .features import generate_technical_features
+from .models.base_model import BaseModel
+from .models.model_factory import ModelFactory
 
 def predict_next_day(ticker: str):
     """
@@ -82,15 +80,3 @@ def predict_next_day(ticker: str):
         "buy_threshold": float(buy_threshold),
         "signal": signal
     }
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Predict next day's price movement for a given stock ticker.")
-    parser.add_argument(
-        '--ticker',
-        type=str,
-        required=True,
-        help="The stock ticker symbol (e.g., 'AAPL', 'AIR.PA')."
-    )
-    args = parser.parse_args()
-
-    predict_next_day(ticker=args.ticker.upper())
