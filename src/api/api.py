@@ -1,10 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
-from stocks.routes import stocks_bp
-from analysis.routes import analysis_bp 
-from markets.routes import markets_bp 
-import os
-import sys
+from .stocks.routes import stocks_bp
+from .analysis.routes import analysis_bp 
+from .markets.routes import markets_bp 
 
 
 def create_api():
