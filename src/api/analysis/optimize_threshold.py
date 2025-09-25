@@ -5,15 +5,30 @@ import re
 import numpy as np
 import sys
 
-def optimize_thresholds(model_dir="src/api/analysis/models", backtest_script="src/api/analysis/backtest.py", output_file="src/api/analysis/optimized_thresholds.json"):
+
+def optimize_thresholds(ticker_arg=None, model_dir="src/api/analysis/models", backtest_script="src/api/analysis/backtest.py", output_file="src/api/analysis/optimized_thresholds.json"):
     """
     Optimizes the buy threshold for each model by running backtests and
     selecting the threshold that yields the highest cumulative return.
+    If a ticker is provided, only optimizes for that ticker.
     """
-    model_files = [f for f in os.listdir(model_dir) if f.endswith('.joblib')]
-    optimized_thresholds = {}
+    if ticker_arg:
+        # Construct the expected model filename based on the ticker
+        model_files = [f"buy_signal_classifier_{ticker_arg.lower()}.joblib"]
+        if not os.path.exists(os.path.join(model_dir, model_files[0])):
+            print(f"Model file for ticker {ticker_arg} not found. Exiting.")
+            return
+    else:
+        model_files = [f for f in os.listdir(model_dir) if f.endswith('.joblib')]
 
-    threshold_range = np.arange(0.50, 0.61, 0.01) # Test thresholds from 0.50 to 0.70
+    # Load existing thresholds
+    if os.path.exists(output_file):
+        with open(output_file, 'r') as f:
+            optimized_thresholds = json.load(f)
+    else:
+        optimized_thresholds = {}
+
+    threshold_range = np.arange(0.50, 0.71, 0.01) # Test thresholds from 0.50 to 0.70
 
     for model_file in model_files:
         model_name = model_file

@@ -2,12 +2,15 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import os
-from sklearn.model_selection import TimeSeriesSplit
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import argparse
 
-from features import generate_technical_features
-from models.model_factory import ModelFactory
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+from .features import generate_technical_features
+from .models.model_factory import ModelFactory
+from .optimize_threshold import optimize_thresholds
+
 
 def train_model(ticker: str, model_class_name: str = "RandomForestModel", **model_kwargs):
     """
@@ -88,10 +91,15 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
         # Create a fresh model instance for each fold to avoid data leakage
         fold_model_instance = ModelFactory.create_model(model_class_name, ticker, selected_features, **model_kwargs)
         fold_model_instance.train(X_train_fold, y_train_fold)
-
         y_pred_fold = fold_model_instance.model.predict(X_test_fold)
+
+        # Check if the test set has more than one class
+        if len(np.unique(y_test_fold)) < 2:
+            print(f"  Skipping metrics for fold {fold + 1} due to only one class present in the test set.")
+            continue
+
         accuracy_fold = accuracy_score(y_test_fold, y_pred_fold)
-        report_fold = classification_report(y_test_fold, y_pred_fold, target_names=["Down (0)", "Up (1)"], output_dict=True)
+        report_fold = classification_report(y_test_fold, y_pred_fold, target_names=["Down (0)", "Up (1)"], output_dict=True, zero_division=0)
         cm_fold = confusion_matrix(y_test_fold, y_pred_fold)
 
         accuracies.append(accuracy_fold)
@@ -105,16 +113,19 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
         # print(cm_fold)
 
     print("\n--- Cross-Validation Summary ---")
-    print(f"Average Accuracy: {np.mean(accuracies):.4f} (+/- {np.std(accuracies):.4f})")
-    
-    # Calculate average precision, recall, f1-score for class 1 (Up)
-    avg_precision_up = np.mean([r['Up (1)']['precision'] for r in reports])
-    avg_recall_up = np.mean([r['Up (1)']['recall'] for r in reports])
-    avg_f1_up = np.mean([r['Up (1)']['f1-score'] for r in reports])
-    
-    print(f"Average Precision (Up): {avg_precision_up:.4f}")
-    print(f"Average Recall (Up): {avg_recall_up:.4f}")
-    print(f"Average F1-Score (Up): {avg_f1_up:.4f}")
+    if not accuracies:
+        print("Could not compute cross-validation metrics. All folds were skipped.")
+    else:
+        print(f"Average Accuracy: {np.mean(accuracies):.4f} (+/- {np.std(accuracies):.4f})")
+        
+        # Calculate average precision, recall, f1-score for class 1 (Up)
+        avg_precision_up = np.mean([r['Up (1)']['precision'] for r in reports])
+        avg_recall_up = np.mean([r['Up (1)']['recall'] for r in reports])
+        avg_f1_up = np.mean([r['Up (1)']['f1-score'] for r in reports])
+        
+        print(f"Average Precision (Up): {avg_precision_up:.4f}")
+        print(f"Average Recall (Up): {avg_recall_up:.4f}")
+        print(f"Average F1-Score (Up): {avg_f1_up:.4f}")
     print("--------------------------------------------")
 
     # Re-run for the final model to be saved (using the last split for consistency with previous behavior)
@@ -129,16 +140,19 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
     model_instance.train(X_train, y_train)
 
     # 4. Evaluate model (using the internal sklearn model for metrics)
-    y_pred = model_instance.model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred, target_names=["Down (0)", "Up (1)"])
-    cm = confusion_matrix(y_test, y_pred)
+    if len(np.unique(y_test)) < 2:
+        print("Skipping final evaluation because only one class is present in the test set.")
+    else:
+        y_pred = model_instance.model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        report = classification_report(y_test, y_pred, target_names=["Down (0)", "Up (1)"], zero_division=0)
+        cm = confusion_matrix(y_test, y_pred)
 
-    print(f"Accuracy: {accuracy:.4f}")
-    print("Classification Report:")
-    print(report)
-    print("Confusion Matrix:")
-    print(cm)
+        print(f"Accuracy: {accuracy:.4f}")
+        print("Classification Report:")
+        print(report)
+        print("Confusion Matrix:")
+        print(cm)
 
     # Feature importance
     if hasattr(model_instance.model, 'feature_importances_'):
@@ -153,6 +167,14 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
 
     # 5. Save model
     model_instance.save(directory=os.path.join(os.path.dirname(__file__), 'models'))
+
+    # 6. Optimize and save the buy threshold for the newly trained model
+    print(f"\n--- Optimizing Buy Threshold for {ticker} ---")
+    try:
+        optimize_thresholds(ticker_arg=ticker)
+        print(f"--- Threshold optimization for {ticker} complete ---")
+    except Exception as e:
+        print(f"An error occurred during threshold optimization for {ticker}: {e}")
 
 
 if __name__ == "__main__":

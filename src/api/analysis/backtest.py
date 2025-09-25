@@ -62,7 +62,7 @@ def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", 
     next_returns = model_data['next_return']
 
     # 5. Predict probabilities using the model instance
-    proba = model_instance.predict_proba(X)  # Probability of "Up"
+    proba = model_instance.predict_proba(X)  # This now correctly receives a 1D array
     signals = (proba >= buy_threshold)
 
     # 6. Extract trades

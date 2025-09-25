@@ -165,5 +165,15 @@ Ceci démarrera à la fois:
 
 **Résolution:** Le sous-processus `train_model.py` était exécuté avec un contexte de module incorrect. La correction a consisté à lancer le sous-processus depuis la racine du projet en spécifiant le paramètre `cwd` dans `subprocess.Popen`.
 
+### Problème: Fiabilisation du cycle de vie des modèles (Session du 23/09/2025)
+
+**Description:** Le cycle de vie des modèles présentait plusieurs problèmes : l'optimisation des seuils n'était pas automatique, l'entraînement échouait pour les tickers avec peu de données, et un bug critique dans le script de backtest empêchait la génération de transactions, faussant l'évaluation des performances.
+
+**Résolution:**
+1.  **Automatisation de l'Optimisation :** Le script `train_model.py` a été modifié pour appeler automatiquement la logique d'optimisation des seuils après chaque entraînement réussi.
+2.  **Robustification de l'Entraînement :** Le processus d'entraînement gère désormais les cas où des "folds" de validation croisée ou des jeux de test finaux ne contiennent qu'une seule classe de résultats, évitant les crashs.
+3.  **Correction du Bug de Backtesting :** La logique de sélection de la probabilité de prédiction dans `backtest.py` a été corrigée, permettant une génération et une évaluation correctes des transactions.
+4.  **Ajout de Scripts de Maintenance :** Les scripts `retrain_all.py` et `evaluate_performance.py` ont été créés et documentés pour faciliter la maintenance et l'évaluation des modèles.
+
 ### Licence
 MIT

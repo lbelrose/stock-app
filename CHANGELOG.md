@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 029 - Fiabilisation et Automatisation du Cycle de Vie des Modèles IA
+
+- **Automatisation :** L'optimisation des seuils d'achat est désormais automatiquement déclenchée après chaque entraînement de modèle.
+- **Robustesse :** L'entraînement est maintenant plus robuste et ne plante plus pour les tickers avec peu de données (ex: GLE, RMS) en ignorant les "folds" de validation invalides.
+- **Correction Critique :** Un bug majeur a été corrigé dans le script de backtest qui empêchait la génération de transactions. Les performances affichées sont désormais correctes.
+- **Utilitaires :** Ajout de deux scripts de maintenance (`retrain_all.py` et `evaluate_performance.py`) pour faciliter le ré-entraînement et l'évaluation des modèles.
+- **Documentation :** Mise à jour du `README.md` pour documenter ces nouveaux scripts.
+
 ## 028 - Intégration Frontend des Scripts Génériques d'Entraînement et de Prédiction
 
 - Mise à jour de `src/app/shared/services/stock.service.ts` :

@@ -89,3 +89,38 @@ pytest src/api/
 ## License
 
 MIT
+
+## Scripts de Maintenance
+
+Le projet inclut des scripts utilitaires à la racine pour faciliter la maintenance des modèles de Machine Learning.
+
+### `retrain_all.py`
+
+Ce script recherche tous les modèles `.joblib` existants dans `src/api/analysis/models`, extrait leurs tickers, et relance leur entraînement complet. Après chaque entraînement, il déclenche automatiquement l'optimisation du seuil d'achat.
+
+**Usage :**
+```bash
+python retrain_all.py
+```
+C'est utile pour mettre à jour tous les modèles en une seule commande après des modifications de la logique d'entraînement ou des features.
+
+### `evaluate_performance.py`
+
+Ce script évalue la performance de tous les modèles pour lesquels un seuil optimal a été défini. Il exécute un backtest sur une période "hors échantillon" (définie dans le script, par défaut `2025-07-01` au `2025-09-23`) et affiche un tableau récapitulatif des performances.
+
+**Usage :**
+```bash
+python evaluate_performance.py
+```
+
+**Exemple de sortie :**
+```
+--- Performance Summary ---
+Ticker  Threshold  Return (%)  Return B&H (%)  Max Drawdown (%)  Win Rate (%)  Trades
+   AIR       0.51        4.57            2.93             -4.19         47.83      23
+  AMZN       0.58        1.13           -2.77              0.00        100.00       1
+   GLE       0.59        0.00            0.00              0.00          0.00       0
+  NVDA       0.52       -7.16            3.23            -10.78         41.67      24
+    SU       0.51        3.90            5.88             -2.74         55.56      18
+  TSLA       0.56       -1.13           40.85             -2.12         50.00       2
+```
