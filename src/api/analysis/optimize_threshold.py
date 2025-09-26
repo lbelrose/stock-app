@@ -28,7 +28,7 @@ def optimize_thresholds(ticker_arg=None, model_dir="src/api/analysis/models", ba
     else:
         optimized_thresholds = {}
 
-    threshold_range = np.arange(0.50, 0.71, 0.01) # Test thresholds from 0.50 to 0.70
+    threshold_range = np.arange(0.50, 0.65, 0.01) # Test thresholds from 0.50 to 0.65
 
     for model_file in model_files:
         model_name = model_file

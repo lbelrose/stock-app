@@ -9,7 +9,7 @@ def analyze_all_performances():
     and prints a summary of the performance.
     """
     thresholds_file = "src/api/analysis/optimized_thresholds.json"
-    start_date = "2025-07-01"
+    start_date = "2025-01-01"
     end_date = "2025-09-23"
     
     try:

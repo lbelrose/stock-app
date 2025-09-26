@@ -2,32 +2,31 @@
     "AIR": {
         "model_name": "buy_signal_classifier_air.joblib",
         "optimal_buy_threshold": 0.51,
-        "max_cumulative_return_percent": 14.22
+        "max_cumulative_return_percent": 47.28
     },
     "AMZN": {
         "model_name": "buy_signal_classifier_amzn.joblib",
-        "optimal_buy_threshold": 0.58,
-        "max_cumulative_return_percent": 1.37
+        "optimal_buy_threshold": 0.55,
+        "max_cumulative_return_percent": 66.5
     },
     "GLE": {
         "model_name": "buy_signal_classifier_gle.joblib",
-        "optimal_buy_threshold": 0.59,
-        "max_cumulative_return_percent": 31.57,
-        "model_class_name": "RandomForestModel"
+        "optimal_buy_threshold": 0.53,
+        "max_cumulative_return_percent": 359.88
     },
     "NVDA": {
         "model_name": "buy_signal_classifier_nvda.joblib",
-        "optimal_buy_threshold": 0.52,
-        "max_cumulative_return_percent": 61.18
+        "optimal_buy_threshold": 0.59,
+        "max_cumulative_return_percent": 83.27
     },
     "SU": {
         "model_name": "buy_signal_classifier_su.joblib",
-        "optimal_buy_threshold": 0.51,
-        "max_cumulative_return_percent": 19.8
+        "optimal_buy_threshold": 0.56,
+        "max_cumulative_return_percent": 49.19
     },
     "TSLA": {
         "model_name": "buy_signal_classifier_tsla.joblib",
-        "optimal_buy_threshold": 0.56,
-        "max_cumulative_return_percent": 3.53
+        "optimal_buy_threshold": 0.5,
+        "max_cumulative_return_percent": 209.93
     }
 }
