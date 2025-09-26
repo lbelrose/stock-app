@@ -10,7 +10,7 @@ def analyze_all_performances():
     """
     thresholds_file = "src/api/analysis/optimized_thresholds.json"
     start_date = "2025-01-01"
-    end_date = "2025-09-23"
+    end_date = "2025-09-01"
     
     try:
         with open(thresholds_file, 'r') as f:

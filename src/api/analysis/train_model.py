@@ -19,7 +19,7 @@ def train_model(ticker: str, model_class_name: str = "RandomForestModel", **mode
     print(f"Starting training for {ticker} with model {model_class_name}...")
 
     # 1. Fetch data
-    data = yf.Ticker(ticker).history(start="2024-06-30", end="2025-06-30")
+    data = yf.Ticker(ticker).history(start="2005-01-01", end="2025-01-01")
     if data.empty:
         raise ValueError(f"No data found for {ticker}")
     data = data.sort_index(ascending=True)

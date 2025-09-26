@@ -9,7 +9,7 @@ from .features import generate_technical_features
 from .models.base_model import BaseModel
 from .models.model_factory import ModelFactory
 
-def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2024-12-31", buy_threshold=0.55, model_name="buy_signal_classifier_general.joblib"):
+def run_backtest(ticker="AAPL", start_date="2015-01-01", end_date="2025-06-30", buy_threshold=0.55, model_name="buy_signal_classifier_general.joblib"):
     """
     Runs a backtest on historical data using the trained model.
     Simulates buying at close when signal is strong, selling next day.

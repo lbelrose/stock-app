@@ -51,8 +51,8 @@ def optimize_thresholds(ticker_arg=None, model_dir="src/api/analysis/models", ba
             command = [
                 sys.executable, "-m", "src.api.analysis.backtest",
                 "--ticker", ticker,
-                "--start_date", "2025-01-01", # Use a broad historical range for optimization
-                "--end_date", "2025-06-30",
+                "--start_date", "2005-01-01", # Use a broad historical range for optimization
+                "--end_date", "2025-01-01",
                 "--buy_threshold", f"{threshold:.2f}",
                 "--model_name", model_name
             ]
