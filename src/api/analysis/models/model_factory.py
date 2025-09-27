@@ -1,4 +1,6 @@
+# src/api/analysis/models/model_factory.py
 from .random_forest_model import RandomForestModel
+from .xgboost_model import XGBoostModel
 
 class ModelFactory:
     """
@@ -6,6 +8,7 @@ class ModelFactory:
     """
     _models = {
         "RandomForestModel": RandomForestModel,
+        "XGBoostModel": XGBoostModel,
         # Ajouter d'autres modèles ici au fur et à mesure
     }
 

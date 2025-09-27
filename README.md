@@ -94,6 +94,59 @@ MIT
 
 Le projet inclut des scripts utilitaires à la racine pour faciliter la maintenance des modèles de Machine Learning.
 
+### Pipeline Complet
+
+Voici un aperçu clair de la chaîne complète de traitement pour un ticker :
+
+                ┌─────────────────────┐
+                │   Raw Market Data   │
+                │  (yfinance / CSV)   │
+                └─────────┬───────────┘
+                          │
+                          ▼
+                ┌──────────────────────┐
+                │ Feature Generation   │
+                │ (technical indicators│
+                │  + lagged returns)   │
+                └─────────┬────────────┘
+                          │
+                          ▼
+                ┌─────────────────────┐
+                │   Model Training    │
+                │ (train_model.py)    │
+                │ - Modular ML model  │
+                │ - Features + payload│
+                └─────────┬───────────┘
+                          │
+                          ▼
+                ┌──────────────────────────┐
+                │ Threshold Optimization   │
+                │ (optimize_thresholds)    │
+                │ - Optimized buy threshold│
+                │   saved in model payload │
+                └─────────┬────────────────┘
+                          │
+           ┌──────────────┴───────────────┐
+           ▼                              ▼
+ ┌─────────────────────┐         ┌───────────────────────────┐
+ │      Backtesting    │         │ Evaluate Performance      │
+ │   (run_backtest.py) │         │ (evaluate_performance)    │
+ │ - Use trained model │         │ - Use optimized thresholds│
+ │   & buy threshold   │         │ - Out-of-sample results   │
+ └─────────┬───────────┘         └───────────────────────────┘
+           │
+           ▼
+ ┌─────────────────────┐
+ │ Performance Metrics │
+ │ - Returns (%)       │
+ │ - Win Rate (%)      │
+ │ - Max Drawdown (%)  │
+ │ - Trades executed   │
+ └─────────────────────┘
+
+
+Chaque étape peut être exécutée depuis Python ou en ligne de commande.
+
 ### `retrain_all.py`
 
 Ce script recherche tous les modèles `.joblib` existants dans `src/api/analysis/models`, extrait leurs tickers, et relance leur entraînement complet. Après chaque entraînement, il déclenche automatiquement l'optimisation du seuil d'achat.
